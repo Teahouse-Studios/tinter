@@ -1,0 +1,13 @@
+{
+  "name": "you-draw-i-guess",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": ["packages/*"],
+  "repository": "https://github.com/XxLittleCxX/you-draw-i-guess",
+  "author": "LittleC <i@ltlec.cn>",
+  "scripts": {
+    "dev:web": "yarn workspace @teahouse/guess-web dev",
+    "watch:server": "yarn workspace @teahouse/guess-server watch",
+    "dev:server": "yarn workspace @teahouse/guess-server dev"
+  }
+}
