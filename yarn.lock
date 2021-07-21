@@ -264,6 +264,13 @@
     react-is "^16.8.0 || ^17.0.0"
     react-transition-group "^4.4.0"
 
+"@material-ui/icons@^4.11.2":
+  version "4.11.2"
+  resolved "https://registry.nlark.com/@material-ui/icons/download/@material-ui/icons-4.11.2.tgz#b3a7353266519cd743b6461ae9fdfcb1b25eb4c5"
+  integrity sha1-s6c1MmZRnNdDtkYa6f38sbJetMU=
+  dependencies:
+    "@babel/runtime" "^7.4.4"
+
 "@material-ui/styles@^4.11.4":
   version "4.11.4"
   resolved "https://registry.yarnpkg.com/@material-ui/styles/-/styles-4.11.4.tgz#eb9dfccfcc2d208243d986457dff025497afa00d"
@@ -1541,6 +1548,11 @@ make-dir@^3.0.0:
   integrity sha512-g3FeP20LNwhALb/6Cz6Dd4F2ngze0jz7tbzrD2wAV+o9FeNHe4rL+yK2md0J/fiSf1sa1ADhXqi5+oVwOM/eGw==
   dependencies:
     semver "^6.0.0"
+
+mdi-material-ui@^6.22.1:
+  version "6.22.1"
+  resolved "https://registry.nlark.com/mdi-material-ui/download/mdi-material-ui-6.22.1.tgz#f4cd3fdd24103b87204a5d7fe1096c20b93f8d49"
+  integrity sha1-9M0/3SQQO4cgSl1/4QlsILk/jUk=
 
 media-typer@0.3.0:
   version "0.3.0"
