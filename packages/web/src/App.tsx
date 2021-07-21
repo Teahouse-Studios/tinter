@@ -1,16 +1,15 @@
-import React, {useEffect} from 'react'
-import SockJS from "sockjs-client";
+import React from "react";
+import {HashRouter, Switch, Route} from "react-router-dom";
+import RoomPage from "./pages/room";
 
-const sockjs = window.SockJS as typeof SockJS
-
-const sock = new sockjs('http://localhost:45000/echo')
-
-function App() {
-  return (
-    <div>
-      Hello
-    </div>
-  )
+const App = () => {
+  return <HashRouter>
+    <Switch>
+      <Route path={"/room"} exact>
+        <RoomPage />
+      </Route>
+    </Switch>
+  </HashRouter>
 }
 
-export default App
+export default App;

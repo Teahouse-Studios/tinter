@@ -1,18 +1,16 @@
+import Game from "./game";
+
 const Koa = require('koa')
 const http = require('http')
-const sockjs = require('sockjs');
+const cors = require('@koa/cors');
 
 const app = new Koa()
+app.use(cors({
+  credentials: true
+}));
 
-const echo = sockjs.createServer({prefix: '/echo'});
-echo.on('connection', function (conn) {
-  conn.on('data', function (message) {
-    conn.write(message);
-  });
-  conn.on('close', function () {
-  });
-});
-
-const server = http.createServer(app.callback());
-echo.installHandlers(server, {prefix: '/echo'})
+export const server = http.createServer(app.callback());
 server.listen(45000)
+
+
+let game = new Game()

@@ -6,6 +6,7 @@
     "dev": "nodemon dist/index.js"
   },
   "dependencies": {
+    "@koa/cors": "^3.1.0",
     "koa": "^2.13.1",
     "koa-body": "^4.2.0",
     "nanoid": "^3.1.23",

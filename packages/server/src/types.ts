@@ -4,6 +4,12 @@ export interface IWord {
 }
 
 export interface IPlayer {
-  username: string;
-  avatarUrl: string;
+  id: string;
+  owner?: boolean;
+  username?: string;
+  avatarUrl?: string;
+}
+
+export type WsData = {
+  type: "fetch_players"
 }
