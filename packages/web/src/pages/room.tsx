@@ -3,7 +3,7 @@ import SockJS from 'sockjs-client';
 import {
   Avatar,
   Button,
-  Grid, List, ListItem, ListItemAvatar, ListItemText, Typography,
+  Grid, List, ListItem, ListItemAvatar, ListItemIcon, ListItemText, Typography,
 } from '@material-ui/core';
 import type {ServerWsData} from '../../../server/src/types';
 import {IPlayer} from '../types';
@@ -51,6 +51,7 @@ const RoomPage = () => {
       const data = JSON.parse(msg.data) as ServerWsData;
       if (data.type === 'players') {
         setPlayers(data.data);
+        playersRef.current = data.data
       }
       if (data.type === "player") {
         if (data.subtype === "add") {
@@ -66,6 +67,7 @@ const RoomPage = () => {
         chatRef.current = [...chatRef.current, data]
         setChat(chatRef.current);
       } else if(data.type === "start"){
+        paintboardRef.current.update({type: "clear"});
         if(data.subtype === "guess"){
           stateRef.current = data.data
           if(data.data !== selfId){
@@ -82,6 +84,15 @@ const RoomPage = () => {
           // @ts-ignore
           paintboardRef.current?.draw(data)
         }
+      } else if (data.type === "score"){
+        playersRef.current = playersRef.current.map(v => {
+          if(v.id === data.sender){
+            v.score ||= 0;
+            v.score += data.data
+          }
+          return v
+        })
+        setPlayers(playersRef.current)
       }
     };
     return () => {
@@ -109,7 +120,8 @@ const RoomPage = () => {
   }
   return <div>
     <Grid container spacing={2}>
-      <Grid item xs={10}>
+      <Grid item xs={9}>
+        {players.length < 2 && '您是房主, 等待更多玩家中...'}
         {drawing && (
           <Typography>请画 {drawing}</Typography>
         )}
@@ -118,14 +130,14 @@ const RoomPage = () => {
         )}
         <Paintboard ref={paintboardRef} disabled={!drawing} sockjs={sock.current}/>
       </Grid>
-      <Grid item xs={2}>
+      <Grid item xs={3}>
         <List>
           {players.map((v) => (
             <ListItem>
               <ListItemAvatar>
                 <Avatar src={v.avatarUrl} />
               </ListItemAvatar>
-              <ListItemText primary={v.username}/>
+              <ListItemText primary={v.username + (v.owner ? '(Owner)' : '')} secondary={v.score + '分'}/>
             </ListItem>
           ))}
         </List>
@@ -142,6 +154,11 @@ const RoomPage = () => {
         <GameChat type={'chat'} onSubmit={submitContent} chat={chat} players={players}/>
       </Grid>
     </Grid>
+    <div>
+      <Typography variant={"h5"}>Debug</Typography>
+      <Typography>ownerId {ownerId}</Typography>
+      <Typography>selfId {selfId}</Typography>
+    </div>
   </div>;
 };
 

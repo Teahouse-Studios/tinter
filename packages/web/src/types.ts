@@ -3,4 +3,5 @@ export interface IPlayer {
   owner?: boolean;
   username?: string;
   avatarUrl?: string;
+  score: number;
 }

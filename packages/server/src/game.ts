@@ -143,8 +143,18 @@ export default class Game {
         data: p,
       });
       if(this.players.length === 1){
+        this.boardcast({ type: 'start', subtype: 'guess', data: '' });
         clearInterval(this.startGameInterval)
         this.state = STATE_WAITING
+      }
+      if(!this.players.find(v => v.owner)){
+        if(this.players.length){
+          this.players[0].owner = true
+          this.boardcast({
+            type: 'players',
+            data: this.players,
+          });
+        }
       }
       
     });
