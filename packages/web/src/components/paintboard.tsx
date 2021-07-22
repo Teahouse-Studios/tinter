@@ -154,12 +154,10 @@ const Paintboard = forwardRef((props: IProps, ref) => {
   const onMouseUp = (e: React.MouseEvent<HTMLCanvasElement>) => {
     paintingRef.current = false;
   };
-  return <Box border={2}>
-    <canvas width={'1280'} height={'720'} ref={canvasRef} onMouseDown={onMouseDown} onMouseMove={onMouseMove}
+  return <canvas width={'1280'} height={'720'} ref={canvasRef} onMouseDown={onMouseDown} onMouseMove={onMouseMove}
             onMouseUp={onMouseUp} style={{width: '100%'}}>
     
     </canvas>
-  </Box>
 });
 
 export default Paintboard;

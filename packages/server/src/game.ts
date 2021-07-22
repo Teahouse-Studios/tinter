@@ -44,7 +44,6 @@ export default class Game {
     this.boardcast({type: 'start', subtype: 'guess', data: this.state});
     this.connections[this.state].send({type: 'start', subtype: 'draw', data: this.currentAnswer});
     this.success = {};
-    console.log(this)
     this.startGameInterval = setTimeout(() => {
       this.startGame();
     }, 70000);
@@ -75,13 +74,11 @@ export default class Game {
     
     conn.on('data', (msg) => {
       const data = JSON.parse(msg) as ClientWsData;
-      console.log(data);
       
       if (data.type === "hello") {
         p.avatarUrl = `https://dn-qiniu-avatar.qbox.me/avatar/${crypto.createHash('md5').update(data.data.email).digest("hex")}.jpg`
         p.username = data.data.username
         this.players.push(p);
-        console.log(this.players);
         
         this.boardcast({
           type: 'player',
@@ -124,9 +121,7 @@ export default class Game {
               sender: this.state,
             });
             this.success[conn.id] = true;
-            console.log(Object.keys(this.success).length, this.players.length)
             if(Object.keys(this.success).length === this.players.length - 1){
-              console.log('all finished')
               clearTimeout(this.startGameInterval)
               clearTimeout(this.finishRoundInterval)
               this.finishRound()
@@ -167,9 +162,10 @@ export default class Game {
         subtype: 'remove',
         data: p,
       });
-      if (this.players.length === 1) {
+      if (this.players.length <= 1) {
         this.boardcast({type: 'start', subtype: 'guess', data: ''});
         clearInterval(this.startGameInterval)
+        clearInterval(this.finishRoundInterval)
         this.state = STATE_WAITING
       }
       if (!this.players.find(v => v.owner)) {

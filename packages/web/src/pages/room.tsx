@@ -2,8 +2,8 @@ import React, {useEffect, useMemo, useRef, useState} from 'react';
 import SockJS from 'sockjs-client';
 import {
   Avatar,
-  Button,
-  Grid, LinearProgress, List, ListItem, ListItemAvatar, ListItemIcon, ListItemText, Typography,
+  Button, Container,
+  Grid, LinearProgress, List, ListItem, ListItemAvatar, ListItemIcon, ListItemText, Paper, Typography,
 } from '@material-ui/core';
 import type {ServerMessageEvent, ServerWsData} from '../../../server/src/types';
 import {IPlayer} from '../types';
@@ -48,6 +48,9 @@ const RoomPage = () => {
         type: 'fetch_players',
       }));
     };
+    current.onclose = (msg) => {
+      console.log(msg)
+    }
     current.onmessage = (msg) => {
       const data = JSON.parse(msg.data) as ServerWsData;
       if (data.type === 'players') {
@@ -140,49 +143,51 @@ const RoomPage = () => {
     setTime(time-1)
   }, 1000)
   const progress = useMemo(() => time / timeMax * 100, [time, timeMax])
-  return <div>
+  return <Container>
     <Grid container spacing={2}>
-      <Grid item xs={9}>
-        {players.length < 2 && '您是房主, 等待更多玩家中...'}
+      <Grid item xs={12} sm={9}>
         {drawing && (
-          <Typography>请画 {drawing}</Typography>
+          <Paper variant={"outlined"} style={{marginBottom: 16, padding: 16}}>
+            <Typography variant={"h5"}>{drawing}</Typography>
+            <PaintboardControl callback={controlCallback}/>
+          </Paper>
         )}
-        {drawing && (
-          <PaintboardControl callback={controlCallback}/>
-        )}
-        <Paintboard ref={paintboardRef} disabled={!drawing} sockjs={sock.current}/>
-        <LinearProgress variant={progressType} value={progress} />
+        <Paper variant={"outlined"} style={{position: 'relative'}}>
+          <Paintboard ref={paintboardRef} disabled={!drawing} sockjs={sock.current}/>
+          <LinearProgress variant={progressType} value={progress} />
+          {ownerId === selfId && players.length >= 2 && !stateRef.current && !drawingRef.current && (
+            <div style={{position: 'absolute', width: '100%', height: '100%', top: 0, left: 0,
+            display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+              <Button variant={"outlined"} color={"primary"} onClick={startGame}>开始</Button>
+            </div>
+          )}
+        </Paper>
       </Grid>
-      <Grid item xs={3}>
-        <List>
-          {players.map((v) => (
-            <ListItem>
-              <ListItemAvatar>
-                <Avatar src={v.avatarUrl} />
-              </ListItemAvatar>
-              <ListItemText primary={v.username + (v.owner ? '(Owner)' : '')} secondary={v.score + '分'}/>
-            </ListItem>
-          ))}
-        </List>
+      <Grid item xs={12} sm={3}>
+        <Paper variant={"outlined"}>
+          <List>
+            {players.map((v) => (
+              <ListItem>
+                <ListItemAvatar>
+                  <Avatar src={v.avatarUrl} />
+                </ListItemAvatar>
+                <ListItemText style={{lineBreak: 'anywhere'}} primary={v.username + (v.owner ? '(Owner)' : '')} secondary={v.score + '分'}/>
+              </ListItem>
+            ))}
+          </List>
+        </Paper>
       </Grid>
     </Grid>
-    {ownerId === selfId && players.length >= 2 && !stateRef.current && (
-      <Button variant={"outlined"} color={"primary"} onClick={startGame}>开始</Button>
-    )}
+    
     <Grid container spacing={2}>
-      <Grid item xs={6}>
+      <Grid item xs={12} sm={6}>
         <GameChat type={'answer'} onSubmit={submitContent} chat={chat} players={players}/>
       </Grid>
-      <Grid item xs={6}>
+      <Grid item xs={12} sm={6}>
         <GameChat type={'chat'} onSubmit={submitContent} chat={chat} players={players}/>
       </Grid>
     </Grid>
-    <div>
-      <Typography variant={"h5"}>Debug</Typography>
-      <Typography>ownerId {ownerId}</Typography>
-      <Typography>selfId {selfId}</Typography>
-    </div>
-  </div>;
+  </Container>;
 };
 
 export default RoomPage;
