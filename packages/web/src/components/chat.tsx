@@ -18,7 +18,7 @@ const GameChat: React.FunctionComponent<IProps> = ({type, onSubmit, chat, player
     if (type === 'answer') {
       return chat.filter(v => v.subtype === 'answer' || v.subtype === "currentAnswer").map(v => {
         if(v.subtype === "currentAnswer"){
-          v._sender = "SYSTEM"
+          v.sender = "SYSTEM"
         }
         return v
       })
@@ -26,9 +26,10 @@ const GameChat: React.FunctionComponent<IProps> = ({type, onSubmit, chat, player
       return chat.filter(v => v.subtype === 'chat' || v.subtype === 'info')
     }
   }, [chat, type])
-  const listDom = useRef()
+  const listDom = useRef(null)
   useEffect(() => {
     if(listDom.current){
+      // @ts-ignore
       listDom.current.scrollTo(0, listDom.current.clientHeight)
     }
   }, [list])
@@ -36,7 +37,7 @@ const GameChat: React.FunctionComponent<IProps> = ({type, onSubmit, chat, player
     <div style={{maxHeight: 400, overflow: 'auto'}} ref={listDom}>
       <Typography variant={'h5'}>{type === 'answer' ? '猜' : '聊天'}</Typography>
       {list.map((v) => (
-        <div style={{lineBreak: 'anywhere'}}>{v._sender || players.find(p => p.id === v.sender)?.username || "Unknown"} {v.data}</div>
+        <div style={{lineBreak: 'anywhere'}}>{players.find(p => p.id === v.sender)?.username || v.sender || "Unknown"} {v.data}</div>
       ))}
     </div>
     <form onSubmit={(e) => {

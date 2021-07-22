@@ -7,7 +7,7 @@ import {Box} from "@material-ui/core";
 
 interface IProps {
   disabled: boolean;
-  sockjs: WebSocket
+  sockjs?: WebSocket | null
 }
 
 const POINT_RADIUS = 1.5
@@ -18,7 +18,7 @@ const Paintboard = forwardRef((props: IProps, ref) => {
     update(data: PBData) {
       if (data.type === 'clear') {
         clear()
-        sockjs.send(JSON.stringify({
+        sockjs?.send(JSON.stringify({
           type: "draw",
           subtype: "clear",
           pos: [0, 0]
@@ -28,16 +28,20 @@ const Paintboard = forwardRef((props: IProps, ref) => {
         erasingRef.current = false;
       } else if (data.type === 'eraser_mode') {
         erasingRef.current = true;
-      } else if(data.type === 'color'){
-        ctx.fillStyle = data.data
-        ctx.strokeStyle=data.data
-        colorRef.current = data.data
+      } else if (data.type === 'color') {
+        if (ctx) {
+          ctx.fillStyle = data.data as string
+          ctx.strokeStyle = data.data as string
+          colorRef.current = data.data as string
+        }
       }
     },
     draw(data: DrawEvent) {
-      if(data.color){
-        ctx.fillStyle = data.color
-        ctx.strokeStyle=data.color
+      if (data.color) {
+        if (ctx) {
+          ctx.fillStyle = data.color
+          ctx.strokeStyle = data.color
+        }
         colorRef.current = data.color
       }
       if (data.subtype === "point") {
@@ -46,7 +50,7 @@ const Paintboard = forwardRef((props: IProps, ref) => {
         lineTo(data.pos[0], data.pos[1])
       } else if (data.subtype === 'clear') {
         clear()
-      } else if(data.subtype === "eraser"){
+      } else if (data.subtype === "eraser") {
         eraser(data.pos[0], data.pos[1])
       }
     }
@@ -93,17 +97,17 @@ const Paintboard = forwardRef((props: IProps, ref) => {
     }
   }
   const eraser = (x: number, y: number) => {
-    ctx?.clearRect(x,y, ERASER_RADIUS, ERASER_RADIUS);
+    ctx?.clearRect(x, y, ERASER_RADIUS, ERASER_RADIUS);
   }
   const onMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if(disabled) return;
+    if (disabled) return;
     const newLoc = getLocOnCanvas(e.clientX, e.clientY);
     
     paintingRef.current = true;
     lastPointRef.current = {
       x: newLoc[0], y: newLoc[1],
     };
-    if (ctx) {
+    if (ctx && sockjs) {
       if (!erasingRef.current) {
         drawPoint(lastPointRef.current.x, lastPointRef.current.y)
         sockjs.send(JSON.stringify({
@@ -125,7 +129,7 @@ const Paintboard = forwardRef((props: IProps, ref) => {
   };
   const onMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const newLoc = getLocOnCanvas(e.clientX, e.clientY);
-    if (paintingRef.current && ctx) {
+    if (paintingRef.current && ctx && sockjs) {
       // ctx.moveTo(x,y);
       if (!erasingRef.current) {
         sockjs.send(JSON.stringify({
@@ -153,7 +157,7 @@ const Paintboard = forwardRef((props: IProps, ref) => {
   return <Box border={2}>
     <canvas width={'1280'} height={'720'} ref={canvasRef} onMouseDown={onMouseDown} onMouseMove={onMouseMove}
             onMouseUp={onMouseUp} style={{width: '100%'}}>
-  
+    
     </canvas>
   </Box>
 });

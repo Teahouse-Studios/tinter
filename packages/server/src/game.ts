@@ -2,6 +2,7 @@ import sockjs from 'sockjs';
 import {IPlayer, ClientWsData, ServerWsData} from './types';
 import Words from './words';
 import crypto from 'crypto'
+import { Server } from 'http';
 
 type STATE_WAITING = 0;
 const STATE_WAITING = 0;
@@ -16,9 +17,9 @@ export default class Game {
   success: Record<string, boolean> = {};
   startGameInterval: any
   finishRoundInterval: any
-  startTime: number
+  startTime: number | null= null
   
-  public constructor(public server) {
+  public constructor(public server: Server) {
     this.sockjs.on('connection', this.onConnection.bind(this));
     this.sockjs.installHandlers(server, {prefix: '/room'});
   }
@@ -38,6 +39,7 @@ export default class Game {
     this.startTime = new Date().valueOf()
     this.currentAnswer = Words[Math.floor(Math.random() * Words.length)];
     this.state = this.players[0].id;
+    // @ts-ignore
     this.players.push(this.players.shift());
     this.boardcast({type: 'start', subtype: 'guess', data: this.state});
     this.connections[this.state].send({type: 'start', subtype: 'draw', data: this.currentAnswer});
@@ -107,7 +109,7 @@ export default class Game {
         if (data.subtype === 'answer') {
           if (!this.state) return conn.info('E_NOT_START');
           if (this.state === conn.id) return conn.info('E_DRAW');
-          if ((new Date().valueOf() - this.startTime) > 60 * 10000) return conn.info('E_FINISHED')
+          if ((new Date().valueOf() - this.startTime!) > 60 * 10000) return conn.info('E_FINISHED')
           if (data.data === this.currentAnswer) {
             this.getPlayer(conn.id).score += Math.max(10 - Object.keys(this.success).length, 3);
             this.getPlayer(this.state).score += 3;

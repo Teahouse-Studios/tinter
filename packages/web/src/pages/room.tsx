@@ -5,7 +5,7 @@ import {
   Button,
   Grid, LinearProgress, List, ListItem, ListItemAvatar, ListItemIcon, ListItemText, Typography,
 } from '@material-ui/core';
-import type {ServerWsData} from '../../../server/src/types';
+import type {ServerMessageEvent, ServerWsData} from '../../../server/src/types';
 import {IPlayer} from '../types';
 import Paintboard from '../components/paintboard';
 import PaintboardControl, {PBData} from '../components/paintboardControl';
@@ -20,8 +20,8 @@ const RoomPage = () => {
   const paintboardRef = useRef<HTMLInputElement | null>(null);
   const [players, setPlayers] = useState<IPlayer[]>([]);
   const playersRef = useRef<IPlayer[]>([])
-  const [chat, setChat] = useState<ServerWsData[]>([]);
-  const chatRef = useRef<ServerWsData[]>([])
+  const [chat, setChat] = useState<ServerMessageEvent[]>([]);
+  const chatRef = useRef<ServerMessageEvent[]>([])
   const [selfId, setSelfId] = useState('')
   const ownerId = useMemo(() => players.find(v => v.owner)?.id, [players])
   const stateRef = useRef<GAME_STATE>(0)
@@ -38,7 +38,7 @@ const RoomPage = () => {
         email: ''
       }
       if(localStorage.getItem("user")){
-        user = JSON.parse(localStorage.getItem("user"))
+        user = JSON.parse(localStorage.getItem("user") || "")
       }
       current.send(JSON.stringify({
         type: 'hello',
@@ -74,7 +74,8 @@ const RoomPage = () => {
         }
       } else if(data.type === "start"){
         setProgressType('determinate')
-        paintboardRef.current.update({type: "clear"});
+        // @ts-ignore
+        paintboardRef.current?.update({type: "clear"});
         setTime(60)
         setTimeMax(60)
         if(data.subtype === "guess"){
