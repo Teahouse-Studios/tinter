@@ -2,12 +2,22 @@
   "name": "you-draw-i-guess",
   "version": "1.0.0",
   "private": true,
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
   "repository": "https://github.com/XxLittleCxX/you-draw-i-guess",
   "author": "LittleC <i@ltlec.cn>",
   "scripts": {
     "dev:web": "yarn workspace @teahouse/guess-web dev",
     "watch:server": "yarn workspace @teahouse/guess-server watch",
-    "dev:server": "yarn workspace @teahouse/guess-server dev"
+    "dev:server": "yarn workspace @teahouse/guess-server dev",
+    "lint": "eslint packages --fix"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.28.4",
+    "@typescript-eslint/parser": "^4.28.4",
+    "eslint": "^7.31.0",
+    "eslint-config-airbnb-typescript": "^12.3.1",
+    "eslint-plugin-import": "^2.23.4"
   }
 }
