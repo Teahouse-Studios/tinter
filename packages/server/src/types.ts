@@ -11,9 +11,10 @@ export interface IPlayer {
   avatarUrl?: string;
 }
 
-interface DrawEvent {
+export interface DrawEvent {
   type: 'draw';
-  pos: [number, number][];
+  subtype: 'point' | 'lineTo' | 'clear' | 'eraser'
+  pos: [number, number];
   color: string;
 }
 

@@ -24,6 +24,7 @@ const RoomPage = () => {
   const ownerId = useMemo(() => players.find(v => v.owner)?.id, [players])
   const stateRef = useRef<GAME_STATE>(0)
   const [drawing, setDrawing] = useState('')
+  const drawingRef = useRef('')
   useEffect(() => {
     console.log(paintboardRef);
     sock.current = new Sockjs('http://localhost:45000/room');
@@ -35,7 +36,6 @@ const RoomPage = () => {
     };
     current.onmessage = (msg) => {
       const data = JSON.parse(msg.data) as ServerWsData;
-      console.log(data);
       if (data.type === 'players') {
         setPlayers(data.data);
       }
@@ -57,10 +57,17 @@ const RoomPage = () => {
           stateRef.current = data.data
           if(data.data !== selfId){
             setDrawing('')
+            drawingRef.current = ''
           }
         }else if(data.subtype === "draw"){
           stateRef.current = selfId
           setDrawing(data.data)
+          drawingRef.current = data.data
+        }
+      }else if(data.type === "draw"){
+        if(!drawingRef.current){
+          // @ts-ignore
+          paintboardRef.current?.draw(data)
         }
       }
     };
@@ -93,8 +100,10 @@ const RoomPage = () => {
         {drawing && (
           <Typography>请画 {drawing}</Typography>
         )}
-        <PaintboardControl callback={controlCallback}/>
-        <Paintboard ref={paintboardRef}/>
+        {drawing && (
+          <PaintboardControl callback={controlCallback}/>
+        )}
+        <Paintboard ref={paintboardRef} disabled={!drawing} sockjs={sock.current}/>
       </Grid>
       <Grid item xs={2}>
         <List>

@@ -1,14 +1,28 @@
 import React, {
   forwardRef, useEffect, useImperativeHandle, useMemo, useRef,
 } from 'react';
-import { PBData } from './paintboardControl';
+import {PBData} from './paintboardControl';
+import type {DrawEvent} from "../../../server/src/types";
 
-const Paintboard = forwardRef((props, ref) => {
+interface IProps {
+  disabled: boolean;
+  sockjs: WebSocket
+}
+
+const POINT_RADIUS = 1.5
+const ERASER_RADIUS = 40;
+
+const Paintboard = forwardRef((props: IProps, ref) => {
   useImperativeHandle(ref, () => ({
     update(data: PBData) {
       console.log(data);
       if (data.type === 'clear') {
-        ctx?.clearRect(0, 0, 1280, 720);
+        clear()
+        sockjs.send(JSON.stringify({
+          type: "draw",
+          subtype: "clear",
+          pos: [0, 0]
+        }))
         paintingRef.current = false;
       } else if (data.type === 'edit_mode') {
         erasingRef.current = false;
@@ -16,8 +30,21 @@ const Paintboard = forwardRef((props, ref) => {
         erasingRef.current = true;
       }
     },
+    draw(data: DrawEvent) {
+      console.log(data)
+      if (data.subtype === "point") {
+        drawPoint(data.pos[0], data.pos[1])
+      } else if (data.subtype === "lineTo") {
+        lineTo(data.pos[0], data.pos[1])
+      } else if (data.subtype === 'clear') {
+        clear()
+      } else if(data.subtype === "eraser"){
+        eraser(data.pos[0], data.pos[1])
+      }
+    }
   }));
-
+  const {disabled, sockjs} = props
+  const clear = () => ctx?.clearRect(0, 0, 1280, 720);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   let ctx = useMemo(() => canvasRef.current?.getContext('2d'), [canvasRef.current]);
   const paintingRef = useRef(false);
@@ -39,25 +66,49 @@ const Paintboard = forwardRef((props, ref) => {
     clientY *= 720 / parseFloat(style.height);
     return [clientX, clientY];
   };
-  const onMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const newLoc = getLocOnCanvas(e.clientX, e.clientY);
-
-    paintingRef.current = true;
-    lastPointRef.current = {
-      x: newLoc[0], y: newLoc[1],
-    };
-    // console.log(ctx)
+  const drawPoint = (x: number, y: number) => {
     if (ctx) {
       ctx.lineWidth = 3;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(x, y, POINT_RADIUS, 0, Math.PI * 2);
+      ctx.fill()
+    }
+  }
+  const lineTo = (x: number, y: number) => {
+    if (ctx) {
+      ctx.lineTo(x, y);
+      ctx.stroke();
+    }
+  }
+  const eraser = (x: number, y: number) => {
+    ctx?.clearRect(x,y, ERASER_RADIUS, ERASER_RADIUS);
+  }
+  const onMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if(disabled) return;
+    const newLoc = getLocOnCanvas(e.clientX, e.clientY);
+    
+    paintingRef.current = true;
+    lastPointRef.current = {
+      x: newLoc[0], y: newLoc[1],
+    };
+    if (ctx) {
       if (!erasingRef.current) {
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(lastPointRef.current.x, lastPointRef.current.y, 1.5, 0, Math.PI * 2);
-        ctx.fill();
+        drawPoint(lastPointRef.current.x, lastPointRef.current.y)
+        sockjs.send(JSON.stringify({
+          type: "draw",
+          subtype: "point",
+          pos: [lastPointRef.current.x, lastPointRef.current.y]
+        }))
       } else {
-        ctx.clearRect(lastPointRef.current.x, lastPointRef.current.y, 5, 5);
+        sockjs.send(JSON.stringify({
+          type: "draw",
+          subtype: "eraser",
+          pos: [lastPointRef.current.x, lastPointRef.current.y]
+        }))
+        eraser(lastPointRef.current.x, lastPointRef.current.y)
       }
     }
   };
@@ -66,20 +117,29 @@ const Paintboard = forwardRef((props, ref) => {
     if (paintingRef.current && ctx) {
       // ctx.moveTo(x,y);
       if (!erasingRef.current) {
-        ctx.lineTo(newLoc[0], newLoc[1]);
-        ctx.stroke();
+        sockjs.send(JSON.stringify({
+          type: "draw",
+          subtype: "lineTo",
+          pos: [newLoc[0], newLoc[1]]
+        }))
+        lineTo(newLoc[0], newLoc[1])
       } else {
-        ctx.clearRect(newLoc[0], newLoc[1], 5, 5);
+        sockjs.send(JSON.stringify({
+          type: "draw",
+          subtype: "eraser",
+          pos: [newLoc[0], newLoc[1]]
+        }))
+        eraser(newLoc[0], newLoc[1])
       }
-      lastPointRef.current = { x: newLoc[0], y: newLoc[1] };
+      lastPointRef.current = {x: newLoc[0], y: newLoc[1]};
     }
   };
   const onMouseUp = (e: React.MouseEvent<HTMLCanvasElement>) => {
     paintingRef.current = false;
   };
   return <canvas width={'1280'} height={'720'} ref={canvasRef} onMouseDown={onMouseDown} onMouseMove={onMouseMove}
-    onMouseUp={onMouseUp} style={{ width: '100%' }}>
-
+                 onMouseUp={onMouseUp} style={{width: '100%'}}>
+  
   </canvas>;
 });
 

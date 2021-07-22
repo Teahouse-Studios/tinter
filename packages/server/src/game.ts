@@ -13,6 +13,7 @@ export default class Game {
   sockjs = sockjs.createServer({ prefix: '/room' });
   currentAnswer: string = '';
   success: Record<string, boolean> = {};
+  startGameInterval: any
 
   public constructor(public server) {
     this.sockjs.on('connection', this.onConnection.bind(this));
@@ -38,7 +39,7 @@ export default class Game {
     this.connections[this.state].send({ type: 'start', subtype: 'draw', data: this.currentAnswer });
     this.success = {};
     console.log(this)
-    setTimeout(() => {
+    this.startGameInterval = setTimeout(() => {
       this.startGame();
     }, 60000);
     return true;
@@ -136,6 +137,11 @@ export default class Game {
         subtype: 'remove',
         data: p,
       });
+      if(this.players.length === 1){
+        clearInterval(this.startGameInterval)
+        this.state = STATE_WAITING
+      }
+      
     });
   }
 }
