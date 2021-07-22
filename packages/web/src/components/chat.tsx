@@ -1,16 +1,21 @@
 import React, { useState } from 'react';
 import { TextField, Typography, useTheme } from '@material-ui/core';
-
+import { IMessage } from '../types';
+import {ServerWsData} from '@teahouse/guess-server'
 interface IProps {
-  type: 'game' | 'chat'
-  onSubmit: (type: 'game' | 'chat', message: string) => any
+  type: 'answer' | 'chat'
+  onSubmit: (type: 'answer' | 'chat', message: string) => any
+  chat: ServerWsData[]
 }
 
-const GameChat: React.FunctionComponent<IProps> = ({ type, onSubmit }) => {
+const GameChat: React.FunctionComponent<IProps> = ({ type, onSubmit, chat }) => {
   const [input, setInput] = useState('');
   const theme = useTheme();
   return <div>
-    <Typography variant={'h5'}>{type === 'game' ? '猜' : '聊天'}</Typography>
+    <Typography variant={'h5'}>{type === 'answer' ? '猜' : '聊天'}</Typography>
+    {chat.map((v) => (
+      <div>{v.data}</div>
+    ))}
     <form onSubmit={(e) => {
       e.preventDefault();
       console.log('submit');

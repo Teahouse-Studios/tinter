@@ -3,21 +3,22 @@ import SockJS from 'sockjs-client';
 import {
   Grid, List, ListItem, ListItemText,
 } from '@material-ui/core';
-import { IMessage, IPlayer } from '../types';
+import type { ServerWsData } from '../../../server/src/types';
+import { IPlayer } from '../types';
 import Paintboard from '../components/paintboard';
 import PaintboardControl, { PBData } from '../components/paintboardControl';
 import GameChat from '../components/chat';
 
-const sockjs = window.SockJS as typeof SockJS;
+const Sockjs = window.SockJS as SockJS;
 
 const RoomPage = () => {
   const sock = useRef<WebSocket | null>(null);
   const paintboardRef = useRef<HTMLInputElement | null>(null);
   const [players, setPlayers] = useState<IPlayer[]>([]);
-  const [chat, setChat] = useState<IMessage[]>([]);
+  const [chat, setChat] = useState<ServerWsData[]>([]);
   useEffect(() => {
     console.log(paintboardRef);
-    sock.current = new sockjs('http://localhost:45000/room');
+    sock.current = new Sockjs('http://localhost:45000/room');
     const current = sock!.current;
     current.onopen = () => {
       current.send(JSON.stringify({
@@ -25,12 +26,12 @@ const RoomPage = () => {
       }));
     };
     current.onmessage = (msg) => {
-      const data = JSON.parse(msg.data);
+      const data = JSON.parse(msg.data) as ServerWsData;
       console.log(data);
       if (data.type === 'players') {
         setPlayers(data.data);
       } else if (data.type === 'message') {
-
+        setChat([...chat, data.data]);
       }
     };
     return () => {
@@ -44,9 +45,9 @@ const RoomPage = () => {
       paintboardRef.current.update(data);
     }
   };
-  const submitContent = (type: 'game' | 'chat', message: string) => {
+  const submitContent = (type: 'answer' | 'chat', message: string) => {
     sock.current?.send(JSON.stringify({
-      type: 'submit',
+      type: 'message',
       subtype: type,
       data: message,
     }));
@@ -69,10 +70,10 @@ const RoomPage = () => {
     </Grid>
     <Grid container spacing={2}>
       <Grid item xs={6}>
-        <GameChat type={'game'} onSubmit={submitContent}/>
+        <GameChat type={'answer'} onSubmit={submitContent} chat={chat}/>
       </Grid>
       <Grid item xs={6}>
-        <GameChat type={'chat'} onSubmit={submitContent}/>
+        <GameChat type={'chat'} onSubmit={submitContent} chat={chat}/>
       </Grid>
     </Grid>
   </div>;
