@@ -1,8 +1,9 @@
 import React, {useEffect, useMemo, useRef, useState} from 'react';
 import SockJS from 'sockjs-client';
 import {
+  Avatar,
   Button,
-  Grid, List, ListItem, ListItemText, Typography,
+  Grid, List, ListItem, ListItemAvatar, ListItemText, Typography,
 } from '@material-ui/core';
 import type {ServerWsData} from '../../../server/src/types';
 import {IPlayer} from '../types';
@@ -30,6 +31,18 @@ const RoomPage = () => {
     sock.current = new Sockjs('http://localhost:45000/room');
     const current = sock!.current;
     current.onopen = () => {
+      // @ts-ignore
+      let user = {
+        username: Math.random(),
+        email: ''
+      }
+      if(localStorage.getItem("user")){
+        user = JSON.parse(localStorage.getItem("user"))
+      }
+      current.send(JSON.stringify({
+        type: 'hello',
+        data: user
+      }));
       current.send(JSON.stringify({
         type: 'fetch_players',
       }));
@@ -109,7 +122,10 @@ const RoomPage = () => {
         <List>
           {players.map((v) => (
             <ListItem>
-              <ListItemText primary={v.id}/>
+              <ListItemAvatar>
+                <Avatar src={v.avatarUrl} />
+              </ListItemAvatar>
+              <ListItemText primary={v.username}/>
             </ListItem>
           ))}
         </List>

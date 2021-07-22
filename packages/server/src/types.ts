@@ -25,7 +25,20 @@ export type ClientWsData =
     data: string;
   } | {
     type: 'start';
-  } | DrawEvent;
+  } | {
+  type: 'hello';
+  data: {
+    username: string;
+    email: string;
+  }
+} | DrawEvent;
+
+export type ServerMessageEvent = {
+  type: 'message';
+  subtype: 'chat' | 'answer' | 'info';
+  data: string;
+  sender: string;
+}
 
 export type ServerWsData =
   {
@@ -35,12 +48,7 @@ export type ServerWsData =
   } | {
     type: 'players';
     data: IPlayer[];
-  } | {
-    type: 'message';
-    subtype: 'chat' | 'answer' | 'info';
-    data: string;
-    sender: string;
-  } | {
+  } | ServerMessageEvent | {
     type: 'start';
     subtype: 'draw' | 'guess';
     data: string;

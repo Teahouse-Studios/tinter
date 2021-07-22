@@ -1,7 +1,7 @@
 import sockjs from 'sockjs';
 import { IPlayer, ClientWsData, ServerWsData } from './types';
 import Words from './words';
-
+import crypto from 'crypto'
 type STATE_WAITING = 0;
 const STATE_WAITING = 0;
 export type GAME_STATE = STATE_WAITING | string;
@@ -59,26 +59,31 @@ export default class Game {
       sender,
     });
     this.connections[conn.id] = conn;
-    this.players.push(p);
-    console.log(this.players);
-
-    this.boardcast({
-      type: 'player',
-      subtype: 'add',
-      data: p,
-    });
-    conn.send({
-      type: 'players',
-      data: this.players,
-    });
-    conn.send({
-      type: 'selfId',
-      data: conn.id,
-    });
 
     conn.on('data', (msg) => {
       const data = JSON.parse(msg) as ClientWsData;
       console.log(data);
+      
+      if(data.type === "hello"){
+        p.avatarUrl = `https://dn-qiniu-avatar.qbox.me/avatar/${crypto.createHash('md5').update(data.data.email).digest("hex")}.jpg`
+        p.username = data.data.username
+        this.players.push(p);
+        console.log(this.players);
+  
+        this.boardcast({
+          type: 'player',
+          subtype: 'add',
+          data: p,
+        });
+        conn.send({
+          type: 'players',
+          data: this.players,
+        });
+        conn.send({
+          type: 'selfId',
+          data: conn.id,
+        });
+      }
 
       if (data.type === 'draw') return this.boardcast(data);
 
