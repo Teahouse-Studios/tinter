@@ -16,7 +16,6 @@ const ERASER_RADIUS = 40;
 const Paintboard = forwardRef((props: IProps, ref) => {
   useImperativeHandle(ref, () => ({
     update(data: PBData) {
-      console.log(data);
       if (data.type === 'clear') {
         clear()
         sockjs.send(JSON.stringify({
@@ -36,7 +35,6 @@ const Paintboard = forwardRef((props: IProps, ref) => {
       }
     },
     draw(data: DrawEvent) {
-      console.log(data)
       if(data.color){
         ctx.fillStyle = data.color
         ctx.strokeStyle=data.color

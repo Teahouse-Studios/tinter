@@ -35,9 +35,9 @@ export type ClientWsData =
 
 export type ServerMessageEvent = {
   type: 'message';
-  subtype: 'chat' | 'answer' | 'info';
+  subtype: 'chat' | 'answer' | 'info' | 'currentAnswer';
   data: string;
-  sender: string;
+  sender?: string;
 }
 
 export type ServerWsData =
@@ -59,7 +59,7 @@ export type ServerWsData =
     } | {
     type: 'selfId';
     data: string;
-    } | DrawEvent;
+    }| DrawEvent;
 
 declare module 'sockjs' {
   interface Connection {

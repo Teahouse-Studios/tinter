@@ -3,7 +3,7 @@ import SockJS from 'sockjs-client';
 import {
   Avatar,
   Button,
-  Grid, List, ListItem, ListItemAvatar, ListItemIcon, ListItemText, Typography,
+  Grid, LinearProgress, List, ListItem, ListItemAvatar, ListItemIcon, ListItemText, Typography,
 } from '@material-ui/core';
 import type {ServerWsData} from '../../../server/src/types';
 import {IPlayer} from '../types';
@@ -11,6 +11,7 @@ import Paintboard from '../components/paintboard';
 import PaintboardControl, {PBData} from '../components/paintboardControl';
 import GameChat from '../components/chat';
 import type {GAME_STATE} from "../../../server/src/game";
+import useInterval from "../components/useInterval";
 
 const Sockjs = window.SockJS as typeof SockJS;
 
@@ -66,8 +67,16 @@ const RoomPage = () => {
       } else if (data.type === 'message') {
         chatRef.current = [...chatRef.current, data]
         setChat(chatRef.current);
+        if(data.subtype === "currentAnswer"){
+          setTime(10)
+          setTimeMax(10)
+          setDrawing('')
+        }
       } else if(data.type === "start"){
+        setProgressType('determinate')
         paintboardRef.current.update({type: "clear"});
+        setTime(60)
+        setTimeMax(60)
         if(data.subtype === "guess"){
           stateRef.current = data.data
           if(data.data !== selfId){
@@ -118,6 +127,18 @@ const RoomPage = () => {
       type: "start"
     }))
   }
+  useEffect(() => {
+    if(players.length < 2){
+      setProgressType('indeterminate')
+    }
+  }, [players])
+  const [timeMax, setTimeMax] = useState(0)
+  const [time, setTime] = useState(0)
+  const [progressType, setProgressType] = useState<'determinate' | 'indeterminate'>('indeterminate')
+  useInterval(() => {
+    setTime(time-1)
+  }, 1000)
+  const progress = useMemo(() => time / timeMax * 100, [time, timeMax])
   return <div>
     <Grid container spacing={2}>
       <Grid item xs={9}>
@@ -129,6 +150,7 @@ const RoomPage = () => {
           <PaintboardControl callback={controlCallback}/>
         )}
         <Paintboard ref={paintboardRef} disabled={!drawing} sockjs={sock.current}/>
+        <LinearProgress variant={progressType} value={progress} />
       </Grid>
       <Grid item xs={3}>
         <List>

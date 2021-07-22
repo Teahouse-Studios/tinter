@@ -16,7 +16,12 @@ const GameChat: React.FunctionComponent<IProps> = ({type, onSubmit, chat, player
   const theme = useTheme();
   const list = useMemo(() => {
     if (type === 'answer') {
-      return chat.filter(v => v.subtype === 'answer')
+      return chat.filter(v => v.subtype === 'answer' || v.subtype === "currentAnswer").map(v => {
+        if(v.subtype === "currentAnswer"){
+          v._sender = "SYSTEM"
+        }
+        return v
+      })
     } else {
       return chat.filter(v => v.subtype === 'chat' || v.subtype === 'info')
     }
@@ -31,12 +36,11 @@ const GameChat: React.FunctionComponent<IProps> = ({type, onSubmit, chat, player
     <div style={{maxHeight: 400, overflow: 'auto'}} ref={listDom}>
       <Typography variant={'h5'}>{type === 'answer' ? '猜' : '聊天'}</Typography>
       {list.map((v) => (
-        <div style={{lineBreak: 'anywhere'}}>{players.find(p => p.id === v.sender)?.username || "Unknown"} {v.data}</div>
+        <div style={{lineBreak: 'anywhere'}}>{v._sender || players.find(p => p.id === v.sender)?.username || "Unknown"} {v.data}</div>
       ))}
     </div>
     <form onSubmit={(e) => {
       e.preventDefault();
-      console.log('submit');
       onSubmit(type, input);
       setInput('');
     }}>
