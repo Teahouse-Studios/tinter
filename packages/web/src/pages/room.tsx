@@ -1,21 +1,29 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 import SockJS from 'sockjs-client';
 import {
-  Grid, List, ListItem, ListItemText,
+  Button,
+  Grid, List, ListItem, ListItemText, Typography,
 } from '@material-ui/core';
-import type { ServerWsData } from '../../../server/src/types';
-import { IPlayer } from '../types';
+import type {ServerWsData} from '../../../server/src/types';
+import {IPlayer} from '../types';
 import Paintboard from '../components/paintboard';
-import PaintboardControl, { PBData } from '../components/paintboardControl';
+import PaintboardControl, {PBData} from '../components/paintboardControl';
 import GameChat from '../components/chat';
+import type {GAME_STATE} from "../../../server/src/game";
 
-const Sockjs = window.SockJS as SockJS;
+const Sockjs = window.SockJS as typeof SockJS;
 
 const RoomPage = () => {
   const sock = useRef<WebSocket | null>(null);
   const paintboardRef = useRef<HTMLInputElement | null>(null);
   const [players, setPlayers] = useState<IPlayer[]>([]);
+  const playersRef = useRef<IPlayer[]>([])
   const [chat, setChat] = useState<ServerWsData[]>([]);
+  const chatRef = useRef<ServerWsData[]>([])
+  const [selfId, setSelfId] = useState('')
+  const ownerId = useMemo(() => players.find(v => v.owner)?.id, [players])
+  const stateRef = useRef<GAME_STATE>(0)
+  const [drawing, setDrawing] = useState('')
   useEffect(() => {
     console.log(paintboardRef);
     sock.current = new Sockjs('http://localhost:45000/room');
@@ -30,8 +38,30 @@ const RoomPage = () => {
       console.log(data);
       if (data.type === 'players') {
         setPlayers(data.data);
+      }
+      if (data.type === "player") {
+        if (data.subtype === "add") {
+          playersRef.current =[...playersRef.current, data.data]
+          setPlayers(playersRef.current)
+        } else if (data.subtype === "remove") {
+          playersRef.current = playersRef.current.filter(v => v.id !== data.data.id)
+          setPlayers(playersRef.current)
+        }
+      } else if (data.type === 'selfId') {
+        setSelfId(data.data)
       } else if (data.type === 'message') {
-        setChat([...chat, data.data]);
+        chatRef.current = [...chatRef.current, data]
+        setChat(chatRef.current);
+      } else if(data.type === "start"){
+        if(data.subtype === "guess"){
+          stateRef.current = data.data
+          if(data.data !== selfId){
+            setDrawing('')
+          }
+        }else if(data.subtype === "draw"){
+          stateRef.current = selfId
+          setDrawing(data.data)
+        }
       }
     };
     return () => {
@@ -52,9 +82,17 @@ const RoomPage = () => {
       data: message,
     }));
   };
+  const startGame = () => {
+    sock.current?.send(JSON.stringify({
+      type: "start"
+    }))
+  }
   return <div>
     <Grid container spacing={2}>
       <Grid item xs={10}>
+        {drawing && (
+          <Typography>请画 {drawing}</Typography>
+        )}
         <PaintboardControl callback={controlCallback}/>
         <Paintboard ref={paintboardRef}/>
       </Grid>
@@ -62,18 +100,21 @@ const RoomPage = () => {
         <List>
           {players.map((v) => (
             <ListItem>
-              <ListItemText primary={v.id} />
+              <ListItemText primary={v.id}/>
             </ListItem>
           ))}
         </List>
       </Grid>
     </Grid>
+    {ownerId === selfId && players.length >= 2 && !stateRef.current && (
+      <Button variant={"outlined"} color={"primary"} onClick={startGame}>开始</Button>
+    )}
     <Grid container spacing={2}>
       <Grid item xs={6}>
-        <GameChat type={'answer'} onSubmit={submitContent} chat={chat}/>
+        <GameChat type={'answer'} onSubmit={submitContent} chat={chat} players={players}/>
       </Grid>
       <Grid item xs={6}>
-        <GameChat type={'chat'} onSubmit={submitContent} chat={chat}/>
+        <GameChat type={'chat'} onSubmit={submitContent} chat={chat} players={players}/>
       </Grid>
     </Grid>
   </div>;

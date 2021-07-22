@@ -30,7 +30,7 @@ export type ServerWsData =
   {
     type: 'player';
     subtype: 'add' | 'remove';
-    data: string;
+    data: IPlayer;
   } | {
     type: 'players';
     data: IPlayer[];
@@ -47,7 +47,10 @@ export type ServerWsData =
     type: 'score';
     sender: string;
     data: number;
-  } | DrawEvent;
+    } | {
+    type: 'selfId';
+    data: string;
+    } | DrawEvent;
 
 declare module 'sockjs' {
   interface Connection {

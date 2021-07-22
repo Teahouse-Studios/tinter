@@ -4,7 +4,7 @@ import Words from './words';
 
 type STATE_WAITING = 0;
 const STATE_WAITING = 0;
-type GAME_STATE = STATE_WAITING | string;
+export type GAME_STATE = STATE_WAITING | string;
 
 export default class Game {
   players: IPlayer[] = [];
@@ -37,6 +37,7 @@ export default class Game {
     this.boardcast({ type: 'start', subtype: 'guess', data: this.state });
     this.connections[this.state].send({ type: 'start', subtype: 'draw', data: this.currentAnswer });
     this.success = {};
+    console.log(this)
     setTimeout(() => {
       this.startGame();
     }, 60000);
@@ -63,11 +64,15 @@ export default class Game {
     this.boardcast({
       type: 'player',
       subtype: 'add',
-      data: conn.id,
+      data: p,
     });
     conn.send({
       type: 'players',
       data: this.players,
+    });
+    conn.send({
+      type: 'selfId',
+      data: conn.id,
     });
 
     conn.on('data', (msg) => {
@@ -116,7 +121,7 @@ export default class Game {
       }
 
       if (data.type === 'start') {
-        if (!this.state) return conn.info('E_STARTED');
+        if (this.state) return conn.info('E_STARTED');
         if (!this.getPlayer(conn.id).owner) return conn.info('E_NOT_OWNER');
         this.startGame();
       }
@@ -129,7 +134,7 @@ export default class Game {
       this.boardcast({
         type: 'player',
         subtype: 'remove',
-        data: conn.id,
+        data: p,
       });
     });
   }
