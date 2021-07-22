@@ -4,3 +4,8 @@ export interface IPlayer {
   username?: string;
   avatarUrl?: string;
 }
+
+export interface IMessage {
+  sender: IPlayer;
+  message: string;
+}

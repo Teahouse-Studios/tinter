@@ -24,11 +24,17 @@ const Paintboard = forwardRef((props, ref) => {
     x: 0, y: 0
   })
   const getLocOnCanvas = (clientX: number, clientY: number) => {
+    if(!canvasRef.current){
+      return [clientX, clientY];
+    }
+    const style = window.getComputedStyle(canvasRef.current, null)
     const rect = canvasRef.current?.getBoundingClientRect();
     if (rect) {
       clientX -= rect?.left;
       clientY -= rect?.top;
     }
+    clientX *= 1280 / parseFloat(style.width)
+    clientY *= 720 / parseFloat(style.height)
     return [clientX, clientY]
   }
   const onMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -70,7 +76,7 @@ const Paintboard = forwardRef((props, ref) => {
     paintingRef.current = false
   }
   return <canvas width={"1280"} height={"720"} ref={canvasRef} onMouseDown={onMouseDown} onMouseMove={onMouseMove}
-                 onMouseUp={onMouseUp}>
+                 onMouseUp={onMouseUp} style={{width: '100%'}}>
   
   </canvas>
 })

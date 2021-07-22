@@ -1,3 +1,5 @@
+import sockjs from "sockjs";
+
 export interface IWord {
   word: string;
   difficulty: number;
@@ -12,4 +14,8 @@ export interface IPlayer {
 
 export type WsData = {
   type: "fetch_players"
+} | {
+  type: "submit"
+  subtype: "game" | "chat"
+  data: string
 }
