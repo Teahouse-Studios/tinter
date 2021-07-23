@@ -8,6 +8,7 @@
   "repository": "https://github.com/XxLittleCxX/you-draw-i-guess",
   "author": "LittleC <i@ltlec.cn>",
   "scripts": {
+    "build:web": "yarn workspace @teahouse/guess-web build",
     "dev:web": "yarn workspace @teahouse/guess-web dev",
     "watch:server": "yarn workspace @teahouse/guess-server watch",
     "dev:server": "yarn workspace @teahouse/guess-server dev",

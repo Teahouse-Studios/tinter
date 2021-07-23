@@ -33,8 +33,8 @@ const RoomPage = () => {
   const [time, setTime] = useState(0);
   const [progressType, setProgressType] = useState<'determinate' | 'indeterminate'>('indeterminate');
   useEffect(() => {
-    console.log(paintboardRef);
-    sock.current = new Sockjs('http://localhost:45000/room');
+    // @ts-ignore
+    sock.current = new Sockjs(import.meta.env.VITE_SERVER || 'http://localhost:45000/room');
     const current = sock!.current;
     current.onopen = () => {
       // @ts-ignore
