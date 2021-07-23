@@ -26,19 +26,19 @@ export type ClientWsData =
   } | {
     type: 'start';
   } | {
-  type: 'hello';
-  data: {
-    username: string;
-    email: string;
-  }
-} | DrawEvent;
+    type: 'hello';
+    data: {
+      username: string;
+      email: string;
+    }
+  } | DrawEvent;
 
 export type ServerMessageEvent = {
   type: 'message';
   subtype: 'chat' | 'answer' | 'info' | 'currentAnswer';
   data: string;
   sender?: string;
-}
+};
 
 export type ServerWsData =
   {
@@ -56,10 +56,10 @@ export type ServerWsData =
     type: 'score';
     sender: string;
     data: number;
-    } | {
+  } | {
     type: 'selfId';
     data: string;
-    }| DrawEvent;
+  } | DrawEvent;
 
 declare module 'sockjs' {
   interface Connection {

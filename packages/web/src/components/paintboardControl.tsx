@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import { IconButton } from '@material-ui/core';
 import { Clear, Edit } from '@material-ui/icons';
 import { Eraser } from 'mdi-material-ui';
@@ -12,15 +12,18 @@ interface IProps {
   callback: (data: PBData) => any
 }
 
-const colors = ["#000000", "#666666", "#0017f6", "#ffffff", "#aaaaaa", "#26c9ff", "#008d26", "#a9230c", "#964112", "#00ff4d", "#ff0013", "#ff7829", "#b0701c", "#99004e", "#936867", "#ffc926", "#ff008f", "#feafa8", "#00d9a3", "#85b200", "#8000ff", "#052c6c", "#b973ff", "#fff73f"]
+const colors = ['#000000', '#666666', '#0017f6', '#ffffff', '#aaaaaa',
+  '#26c9ff', '#008d26', '#a9230c', '#964112', '#00ff4d', '#ff0013',
+  '#ff7829', '#b0701c', '#99004e', '#936867', '#ffc926', '#ff008f',
+  '#feafa8', '#00d9a3', '#85b200', '#8000ff', '#052c6c', '#b973ff', '#fff73f'];
 const PaintboardControl: React.FunctionComponent<IProps> = ({ callback }) => {
-  const [color, setColor] = useState('#000000')
+  const [color, setColor] = useState('#000000');
   useEffect(() => {
     callback({
       type: 'color',
-      data: color
-    })
-  }, [color])
+      data: color,
+    });
+  }, [color]);
   return <div>
     <IconButton onClick={() => callback({ type: 'edit_mode' })}>
       <Edit/>
@@ -32,15 +35,17 @@ const PaintboardControl: React.FunctionComponent<IProps> = ({ callback }) => {
       <Clear />
     </IconButton>
     <div>
-      <input type={"color"} style={{width: 64, height:32}} onChange={(e) => setColor(e.target.value)} value={color}/>
-      {colors.map(v => (
-        <div style={{width: 32, height: 32, backgroundColor: v, display: "inline-block"}}
+      <input type={'color'} style={{ width: 64, height: 32 }} onChange={(e) => setColor(e.target.value)} value={color}/>
+      {colors.map((v) => (
+        <div style={{
+          width: 32, height: 32, backgroundColor: v, display: 'inline-block',
+        }}
         onClick={() => {
-          setColor(v)
+          setColor(v);
         }}/>
       ))}
     </div>
-  </div>
+  </div>;
 };
 
 export default PaintboardControl;

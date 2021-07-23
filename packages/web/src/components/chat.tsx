@@ -1,7 +1,11 @@
-import React, {useEffect, useMemo, useRef, useState} from 'react';
-import {Box, Paper, TextField, Typography, useTheme} from '@material-ui/core';
-import {IPlayer} from "../types";
-import type {ServerMessageEvent} from "../../../server/src/types";
+import React, {
+  useEffect, useMemo, useRef, useState,
+} from 'react';
+import {
+  Box, Paper, TextField, Typography, useTheme,
+} from '@material-ui/core';
+import { IPlayer } from '../types';
+import type { ServerMessageEvent } from '../../../server/src/types';
 
 interface IProps {
   type: 'answer' | 'chat'
@@ -10,34 +14,35 @@ interface IProps {
   players: IPlayer[]
 }
 
-const GameChat: React.FunctionComponent<IProps> = ({type, onSubmit, chat, players}) => {
+const GameChat: React.FunctionComponent<IProps> = ({
+  type, onSubmit, chat, players,
+}) => {
   const [input, setInput] = useState('');
   const theme = useTheme();
   const list = useMemo(() => {
     if (type === 'answer') {
-      return chat.filter(v => v.subtype === 'answer' || v.subtype === "currentAnswer").map(v => {
-        if(v.subtype === "currentAnswer"){
-          v.sender = "SYSTEM"
+      return chat.filter((v) => v.subtype === 'answer' || v.subtype === 'currentAnswer').map((v) => {
+        if (v.subtype === 'currentAnswer') {
+          v.sender = 'SYSTEM';
         }
-        return v
-      })
-    } else {
-      return chat.filter(v => v.subtype === 'chat' || v.subtype === 'info')
+        return v;
+      });
     }
-  }, [chat, type])
-  const listDom = useRef(null)
+    return chat.filter((v) => v.subtype === 'chat' || v.subtype === 'info');
+  }, [chat, type]);
+  const listDom = useRef(null);
   useEffect(() => {
-    if(listDom.current){
+    if (listDom.current) {
       // @ts-ignore
-      listDom.current.scrollTo(0, listDom.current.clientHeight)
+      listDom.current.scrollTo(0, listDom.current.clientHeight);
     }
-  }, [list])
-  return <Paper variant={"outlined"}>
+  }, [list]);
+  return <Paper variant={'outlined'}>
     <Box p={2}>
       <Typography variant={'h5'}>{type === 'answer' ? '猜' : '聊天'}</Typography>
-      <div style={{height: '20vh', overflow: 'auto'}} ref={listDom}>
+      <div style={{ height: '20vh', overflow: 'auto' }} ref={listDom}>
         {list.map((v) => (
-          <div style={{lineBreak: 'anywhere'}}>{players.find(p => p.id === v.sender)?.username || v.sender || "Unknown"} {v.data}</div>
+          <div style={{ lineBreak: 'anywhere' }}>{players.find((p) => p.id === v.sender)?.username || v.sender || 'Unknown'} {v.data}</div>
         ))}
       </div>
       <form onSubmit={(e) => {
@@ -46,7 +51,7 @@ const GameChat: React.FunctionComponent<IProps> = ({type, onSubmit, chat, player
         setInput('');
       }}>
         <TextField fullWidth variant={'outlined'} label={'输入内容'} onChange={(e) => setInput(e.target.value)}
-                   autoComplete={'off'} value={input} style={{marginTop: theme.spacing(2)}}/>
+          autoComplete={'off'} value={input} style={{ marginTop: theme.spacing(2) }}/>
       </form>
     </Box>
   </Paper>;
