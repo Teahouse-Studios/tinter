@@ -26,6 +26,7 @@ export default class Game {
   startGameInterval: any;
   finishRoundInterval: any;
   startTime: number | null = null;
+  playerMap: Record<string, IPlayer> = {} // email to userid
 
   public constructor(public server: Server) {
     this.sockjs.on('connection', this.onConnection.bind(this));
@@ -103,7 +104,7 @@ export default class Game {
   }
 
   private onConnection(conn: sockjs.Connection) {
-    const p: IPlayer = {
+    let p: IPlayer = {
       id: conn.id,
       score: 0,
       owner: !this.players.length,
@@ -123,6 +124,21 @@ export default class Game {
       if (data.type === 'hello') {
         p.avatarUrl = `https://dn-qiniu-avatar.qbox.me/avatar/${crypto.createHash('md5').update(data.data.email).digest('hex')}.jpg`;
         p.username = data.data.username;
+        if(!data.data.email){
+          conn.send({
+            type: "message",
+            subtype: "info",
+            data: "E_NO_EMAIL"
+          })
+          return conn.close();
+        }
+        
+        if(this.playerMap[data.data.email]){
+          logger.info('restored user score, user: %o', p)
+          p.score = this.playerMap[data.data.email].score
+        }else{
+          this.playerMap[data.data.email] = p
+        }
         this.players.push(p);
         logger.info('player joined, %o', p)
 

@@ -14,10 +14,12 @@ import PaintboardControl, { PBData } from '../components/paintboardControl';
 import GameChat, { ILocalMessage } from '../components/chat';
 import type { GAME_STATE } from '../../../server/src/game';
 import useInterval from '../components/useInterval';
-
+import {useHistory} from 'react-router-dom'
+import {toast} from 'react-toastify'
 const Sockjs = window.SockJS as typeof SockJS;
 
 const RoomPage = () => {
+  const history = useHistory()
   const sock = useRef<WebSocket | null>(null);
   const paintboardRef = useRef<HTMLInputElement | null>(null);
   const [players, setPlayers] = useState<IPlayer[]>([]);
@@ -35,11 +37,13 @@ const RoomPage = () => {
   const answerChatRef = useRef<ILocalMessage[]>([])
   const [chat, setChat] = useState<ILocalMessage[]>([])
   const chatRef = useRef<ILocalMessage[]>([])
-  useEffect(() => {
+
+  const createConnection = () => {
     // @ts-ignore
     sock.current = new Sockjs(import.meta.env.VITE_SERVER || 'http://localhost:45000/room');
     const current = sock!.current;
     current.onopen = () => {
+      toast.success("服务器连接成功")
       // @ts-ignore
       let user = {
         username: Math.random(),
@@ -58,6 +62,8 @@ const RoomPage = () => {
     };
     current.onclose = (msg) => {
       console.log(msg);
+      toast.error("连接中断, 5秒后重试")
+      setTimeout(createConnection, 5000)
     };
     current.onmessage = (msg) => {
       const data = JSON.parse(msg.data) as ServerWsData;
@@ -109,6 +115,9 @@ const RoomPage = () => {
               data: gameChatMap[data.data as chatKey]
             }]
             setChat(chatRef.current)
+          } else if(data.data === "E_NO_EMAIL"){
+            alert('请先设置 email')
+            history.push('/')
           }
         }
         else if (data.subtype === "answer"){
@@ -155,10 +164,13 @@ const RoomPage = () => {
         setPlayers(playersRef.current);
       }
     };
+  }
+  useEffect(() => {
+    createConnection()
     return () => {
-      current.close();
-    };
-  }, []);
+      sock.current?.close()
+    }
+  }, [])
   const controlCallback = (data: PBData) => {
     console.log(data);
     if (paintboardRef.current) {
