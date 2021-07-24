@@ -31,6 +31,8 @@ export type ClientWsData =
       username: string;
       email: string;
     }
+  } | {
+    type: 'skip';
   } | DrawEvent;
 
 export type ServerMessageEvent = {

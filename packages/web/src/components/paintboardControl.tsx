@@ -26,7 +26,7 @@ const PaintboardControl: React.FunctionComponent<IProps> = ({ callback }) => {
   }, [color]);
   return <div>
     <IconButton onClick={() => callback({ type: 'edit_mode' })}>
-      <Edit/>
+      <Edit />
     </IconButton>
     <IconButton onClick={() => callback({ type: 'eraser_mode' })}>
       <Eraser />
@@ -35,14 +35,12 @@ const PaintboardControl: React.FunctionComponent<IProps> = ({ callback }) => {
       <Clear />
     </IconButton>
     <div>
-      <input type={'color'} style={{ width: 64, height: 32 }} onChange={(e) => setColor(e.target.value)} value={color}/>
+      <input type={'color'} style={{ width: 64, height: 32 }} onChange={(e) => setColor(e.target.value)} value={color} />
       {colors.map((v) => (
         <div style={{
           width: 32, height: 32, backgroundColor: v, display: 'inline-block',
         }}
-        onClick={() => {
-          setColor(v);
-        }}/>
+        onClick={() => setColor(v)} />
       ))}
     </div>
   </div>;

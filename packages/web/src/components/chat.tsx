@@ -30,12 +30,9 @@ const GameChat: React.FunctionComponent<IProps> = ({
     }
     return chat.filter((v) => v.subtype === 'chat' || v.subtype === 'info');
   }, [chat, type]);
-  const listDom = useRef(null);
+  const listDom = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (listDom.current) {
-      // @ts-ignore
-      listDom.current.scrollTo(0, listDom.current.clientHeight);
-    }
+    listDom.current?.scrollTo(0, listDom.current.scrollHeight);
   }, [list]);
   return <Paper variant={'outlined'}>
     <Box p={2}>
@@ -51,7 +48,7 @@ const GameChat: React.FunctionComponent<IProps> = ({
         setInput('');
       }}>
         <TextField fullWidth variant={'outlined'} label={'输入内容'} onChange={(e) => setInput(e.target.value)}
-          autoComplete={'off'} value={input} style={{ marginTop: theme.spacing(2) }}/>
+          autoComplete={'off'} value={input} style={{ marginTop: theme.spacing(2) }} />
       </form>
     </Box>
   </Paper>;

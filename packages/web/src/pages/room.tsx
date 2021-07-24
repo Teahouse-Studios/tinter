@@ -146,17 +146,30 @@ const RoomPage = () => {
   }, 1000);
   // eslint-disable-next-line no-mixed-operators
   const progress = useMemo(() => time * 100 / timeMax, [time, timeMax]);
-  return <Container>
+  return <Container style={{ height: '90%' }}>
     <Grid container spacing={2}>
+      <Grid item xs={12} sm={3}>{drawing && (
+        <Paper variant={'outlined'} style={{ marginBottom: 16, padding: 16 }}>
+          <Typography variant={'h5'}>{drawing}</Typography>
+          <PaintboardControl callback={controlCallback} />
+        </Paper>
+      )}
+      <Paper variant={'outlined'}>
+        <List>
+          {players.map((v) => (
+            <ListItem>
+              <ListItemAvatar>
+                <Avatar src={v.avatarUrl} />
+              </ListItemAvatar>
+              <ListItemText style={{ lineBreak: 'anywhere' }} primary={v.username + (v.owner ? '(Owner)' : '')} secondary={`${v.score}分`} />
+            </ListItem>
+          ))}
+        </List>
+      </Paper>
+      </Grid>
       <Grid item xs={12} sm={9}>
-        {drawing && (
-          <Paper variant={'outlined'} style={{ marginBottom: 16, padding: 16 }}>
-            <Typography variant={'h5'}>{drawing}</Typography>
-            <PaintboardControl callback={controlCallback}/>
-          </Paper>
-        )}
         <Paper variant={'outlined'} style={{ position: 'relative' }}>
-          <Paintboard ref={paintboardRef} disabled={!drawing} sockjs={sock.current}/>
+          <Paintboard ref={paintboardRef} disabled={!drawing} sockjs={sock.current} />
           <LinearProgress variant={progressType} value={progress} />
           {ownerId === selfId && players.length >= 2 && !stateRef.current && !drawingRef.current && (
             <div style={{
@@ -174,28 +187,14 @@ const RoomPage = () => {
           )}
         </Paper>
       </Grid>
-      <Grid item xs={12} sm={3}>
-        <Paper variant={'outlined'}>
-          <List>
-            {players.map((v) => (
-              <ListItem>
-                <ListItemAvatar>
-                  <Avatar src={v.avatarUrl} />
-                </ListItemAvatar>
-                <ListItemText style={{ lineBreak: 'anywhere' }} primary={v.username + (v.owner ? '(Owner)' : '')} secondary={`${v.score}分`}/>
-              </ListItem>
-            ))}
-          </List>
-        </Paper>
-      </Grid>
     </Grid>
 
     <Grid container spacing={2}>
       <Grid item xs={12} sm={6}>
-        <GameChat type={'answer'} onSubmit={submitContent} chat={chat} players={players}/>
+        <GameChat type={'answer'} onSubmit={submitContent} chat={chat} players={players} />
       </Grid>
       <Grid item xs={12} sm={6}>
-        <GameChat type={'chat'} onSubmit={submitContent} chat={chat} players={players}/>
+        <GameChat type={'chat'} onSubmit={submitContent} chat={chat} players={players} />
       </Grid>
     </Grid>
   </Container>;

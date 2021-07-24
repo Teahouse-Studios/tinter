@@ -8,12 +8,14 @@ type STATE_WAITING = 0;
 const STATE_WAITING = 0;
 export type GAME_STATE = STATE_WAITING | string;
 
+export const WIN_SCORE = 100;
+
 export default class Game {
   players: IPlayer[] = [];
   connections: Record<string, sockjs.Connection> = {};
   state: GAME_STATE = STATE_WAITING;
   sockjs = sockjs.createServer({ prefix: '/room' });
-  currentAnswer: string = '';
+  currentAnswer: [string, string] = ['', ''];
   success: Record<string, boolean> = {};
   startGameInterval: any;
   finishRoundInterval: any;
@@ -22,12 +24,21 @@ export default class Game {
   public constructor(public server: Server) {
     this.sockjs.on('connection', this.onConnection.bind(this));
     this.sockjs.installHandlers(server, { prefix: '/room' });
+    this.startGame = this.startGame.bind(this);
+    this.finishRound = this.finishRound.bind(this);
   }
 
   public boardcast(msg: ServerWsData) {
-    for (const player of this.players) {
-      this.connections[player.id].send(msg);
-    }
+    for (const player of this.players) this.connections[player.id].send(msg);
+  }
+
+  public score(id: string, score: number) {
+    this.getPlayer(id).score += score;
+    return this.boardcast({
+      type: 'score',
+      data: score,
+      sender: id,
+    });
   }
 
   public getPlayer(name: string) {
@@ -37,24 +48,43 @@ export default class Game {
   public startGame() {
     if (this.players.length < 2) return false;
     this.startTime = new Date().valueOf();
-    this.currentAnswer = Words[Math.floor(Math.random() * Words.length)];
+    this.currentAnswer = [Words[Math.floor(Math.random() * Words.length)], Words[Math.floor(Math.random() * Words.length)]];
     this.state = this.players[0].id;
     // @ts-ignore
     this.players.push(this.players.shift());
     this.boardcast({ type: 'start', subtype: 'guess', data: this.state });
-    this.connections[this.state].send({ type: 'start', subtype: 'draw', data: this.currentAnswer });
+    this.connections[this.state].send({ type: 'start', subtype: 'draw', data: this.currentAnswer.join(' 或 ') });
     this.success = {};
-    this.startGameInterval = setTimeout(() => {
-      this.startGame();
-    }, 70000);
-    this.finishRoundInterval = setTimeout(() => {
-      this.finishRound();
-    }, 60000);
+    this.finishRoundInterval = setTimeout(this.finishRound, 60000);
     return true;
   }
 
   public finishRound() {
-    this.boardcast({ type: 'message', subtype: 'currentAnswer', data: this.currentAnswer });
+    this.boardcast({ type: 'message', subtype: 'currentAnswer', data: this.currentAnswer.join(' 或 ') });
+    this.startGameInterval = setTimeout(this.startGame, 10000);
+    this.checkWinned();
+  }
+
+  public resetRoom() {
+    this.boardcast({ type: 'start', subtype: 'guess', data: '' });
+    clearInterval(this.startGameInterval);
+    clearInterval(this.finishRoundInterval);
+    this.state = STATE_WAITING;
+    this.players.forEach((v) => {
+      v.score = 0;
+    });
+    this.boardcast({
+      type: 'players',
+      data: this.players,
+    });
+  }
+
+  public checkWinned() {
+    const winner = this.players.find((v) => v.score >= WIN_SCORE);
+    if (winner) {
+      clearTimeout(this.startGameInterval);
+      clearTimeout(this.finishRoundInterval);
+    }
   }
 
   private onConnection(conn: sockjs.Connection) {
@@ -99,35 +129,22 @@ export default class Game {
 
       if (data.type === 'message') {
         if (data.subtype === 'chat') {
-          if (data.data === this.currentAnswer) return conn.info('E_SEND_ANSWER');
+          if (this.currentAnswer.includes(data.data)) return conn.info('E_SEND_ANSWER');
           return this.boardcast({ ...data, sender: conn.id });
         }
 
         if (data.subtype === 'answer') {
           if (!this.state) return conn.info('E_NOT_START');
+          if (this.success[conn.id]) return conn.info('E_SUCCESS');
           if (this.state === conn.id) return conn.info('E_DRAW');
           if ((new Date().valueOf() - this.startTime!) > 60 * 10000) return conn.info('E_FINISHED');
-          if (data.data === this.currentAnswer) {
-            this.getPlayer(conn.id).score += Math.max(10 - Object.keys(this.success).length, 3);
-            this.getPlayer(this.state).score += 3;
-            this.boardcast({
-              type: 'score',
-              data: Math.max(10 - Object.keys(this.success).length, 3),
-              sender: conn.id,
-            });
-            this.boardcast({
-              type: 'score',
-              data: 3,
-              sender: this.state,
-            });
+          if (this.currentAnswer.includes(data.data)) {
+            this.score(conn.id, Math.max(10 - Object.keys(this.success).length, 3));
+            this.score(this.state, 3);
             this.success[conn.id] = true;
             if (Object.keys(this.success).length === this.players.length - 1) {
-              clearTimeout(this.startGameInterval);
               clearTimeout(this.finishRoundInterval);
               this.finishRound();
-              this.startGameInterval = setTimeout(() => {
-                this.startGame();
-              }, 10000);
             }
 
             return this.boardcast({
@@ -151,6 +168,13 @@ export default class Game {
         if (!this.getPlayer(conn.id).owner) return conn.info('E_NOT_OWNER');
         this.startGame();
       }
+
+      if (data.type === 'skip') {
+        if (!this.state) return conn.info('E_NOT_STARTED');
+        if (conn.id !== this.state) return conn.info('E_NOT_CURRENT');
+        clearTimeout(this.finishRoundInterval);
+        this.finishRound();
+      }
       return null;
     });
 
@@ -168,14 +192,12 @@ export default class Game {
         clearInterval(this.finishRoundInterval);
         this.state = STATE_WAITING;
       }
-      if (!this.players.find((v) => v.owner)) {
-        if (this.players.length) {
-          this.players[0].owner = true;
-          this.boardcast({
-            type: 'players',
-            data: this.players,
-          });
-        }
+      if (!this.players.find((v) => v.owner) && this.players.length) {
+        this.players[0].owner = true;
+        this.boardcast({
+          type: 'players',
+          data: this.players,
+        });
       }
     });
   }
