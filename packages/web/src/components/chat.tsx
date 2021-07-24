@@ -5,13 +5,17 @@ import {
   Box, Paper, TextField, Typography, useTheme,
 } from '@material-ui/core';
 import { IPlayer } from '../types';
-import type { ServerMessageEvent } from '../../../server/src/types';
-
 interface IProps {
   type: 'answer' | 'chat'
   onSubmit: (type: 'answer' | 'chat', message: string) => any
-  chat: ServerMessageEvent[]
+  chat: ILocalMessage[]
   players: IPlayer[]
+}
+
+export interface ILocalMessage {
+  sender?:string;
+  data: string;
+  color?: string;
 }
 
 const GameChat: React.FunctionComponent<IProps> = ({
@@ -19,27 +23,16 @@ const GameChat: React.FunctionComponent<IProps> = ({
 }) => {
   const [input, setInput] = useState('');
   const theme = useTheme();
-  const list = useMemo(() => {
-    if (type === 'answer') {
-      return chat.filter((v) => v.subtype === 'answer' || v.subtype === 'currentAnswer').map((v) => {
-        if (v.subtype === 'currentAnswer') {
-          v.sender = 'SYSTEM';
-        }
-        return v;
-      });
-    }
-    return chat.filter((v) => v.subtype === 'chat' || v.subtype === 'info');
-  }, [chat, type]);
   const listDom = useRef<HTMLDivElement>(null);
   useEffect(() => {
     listDom.current?.scrollTo(0, listDom.current.scrollHeight);
-  }, [list]);
+  }, [chat]);
   return <Paper variant={'outlined'}>
     <Box p={2}>
       <Typography variant={'h5'}>{type === 'answer' ? '猜' : '聊天'}</Typography>
       <div style={{ height: '20vh', overflow: 'auto' }} ref={listDom}>
-        {list.map((v) => (
-          <div style={{ lineBreak: 'anywhere' }}>{players.find((p) => p.id === v.sender)?.username || v.sender || 'Unknown'} {v.data}</div>
+        {chat.map((v,i) => (
+          <div key={i} style={{ lineBreak: 'anywhere' }}>{v.sender} {v.data}</div>
         ))}
       </div>
       <form onSubmit={(e) => {

@@ -13,6 +13,7 @@ export const WIN_SCORE = 100;
 
 const logger = new Logger('game')
 const sockLogger = new Logger('sockjs')
+const chatLogger = new Logger('chat')
 const sockLog = (v: string, fmt: string, ...args: any[]) => sockLogger.debug(fmt, ...args);
 
 export default class Game {
@@ -39,7 +40,9 @@ export default class Game {
   }
 
   public score(id: string, score: number) {
-    this.getPlayer(id).score += score;
+    const player = this.getPlayer(id)
+    logger.info('add score, player: %s, score: %d', player.username, score)
+    player.score += score;
     return this.boardcast({
       type: 'score',
       data: score,
@@ -62,16 +65,22 @@ export default class Game {
     this.connections[this.state].send({ type: 'start', subtype: 'draw', data: this.currentAnswer.join(' 或 ') });
     this.success = {};
     this.finishRoundInterval = setTimeout(this.finishRound, 60000);
+
+    
+    logger.info('start game, answer: %o, draw: %s', this.currentAnswer, this.getPlayer(this.state).username)
+
     return true;
   }
 
   public finishRound() {
+    logger.info('finish round')
     this.boardcast({ type: 'message', subtype: 'currentAnswer', data: this.currentAnswer.join(' 或 ') });
     this.startGameInterval = setTimeout(this.startGame, 10000);
     this.checkWinned();
   }
 
   public resetRoom() {
+    logger.info('reset room')
     this.boardcast({ type: 'start', subtype: 'guess', data: '' });
     clearInterval(this.startGameInterval);
     clearInterval(this.finishRoundInterval);
@@ -137,6 +146,7 @@ export default class Game {
       if (data.type === 'message') {
         if (data.subtype === 'chat') {
           if (this.currentAnswer.includes(data.data)) return conn.info('E_SEND_ANSWER');
+          chatLogger.info('[chat] %s: %s', p.username, data.data)
           return this.boardcast({ ...data, sender: conn.id });
         }
 
@@ -145,6 +155,7 @@ export default class Game {
           if (this.success[conn.id]) return conn.info('E_SUCCESS');
           if (this.state === conn.id) return conn.info('E_DRAW');
           if ((new Date().valueOf() - this.startTime!) > 60 * 10000) return conn.info('E_FINISHED');
+          chatLogger.info('[answer] %s: %s', p.username, data.data)
           if (this.currentAnswer.includes(data.data)) {
             this.score(conn.id, Math.max(10 - Object.keys(this.success).length, 3));
             this.score(this.state, 3);
@@ -193,11 +204,9 @@ export default class Game {
         subtype: 'remove',
         data: p,
       });
+      logger.info('player left, %o', p)
       if (this.players.length <= 1) {
-        this.boardcast({ type: 'start', subtype: 'guess', data: '' });
-        clearInterval(this.startGameInterval);
-        clearInterval(this.finishRoundInterval);
-        this.state = STATE_WAITING;
+        this.resetRoom()
       }
       if (!this.players.find((v) => v.owner) && this.players.length) {
         this.players[0].owner = true;

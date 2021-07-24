@@ -11,7 +11,7 @@ import type { ServerMessageEvent, ServerWsData } from '../../../server/src/types
 import { IPlayer } from '../types';
 import Paintboard from '../components/paintboard';
 import PaintboardControl, { PBData } from '../components/paintboardControl';
-import GameChat from '../components/chat';
+import GameChat, { ILocalMessage } from '../components/chat';
 import type { GAME_STATE } from '../../../server/src/game';
 import useInterval from '../components/useInterval';
 
@@ -22,8 +22,6 @@ const RoomPage = () => {
   const paintboardRef = useRef<HTMLInputElement | null>(null);
   const [players, setPlayers] = useState<IPlayer[]>([]);
   const playersRef = useRef<IPlayer[]>([]);
-  const [chat, setChat] = useState<ServerMessageEvent[]>([]);
-  const chatRef = useRef<ServerMessageEvent[]>([]);
   const [selfId, setSelfId] = useState('');
   const ownerId = useMemo(() => players.find((v) => v.owner)?.id, [players]);
   const stateRef = useRef<GAME_STATE>(0);
@@ -32,6 +30,11 @@ const RoomPage = () => {
   const [timeMax, setTimeMax] = useState(0);
   const [time, setTime] = useState(0);
   const [progressType, setProgressType] = useState<'determinate' | 'indeterminate'>('indeterminate');
+
+  const [answerChat, setAnswerChat] = useState<ILocalMessage[]>([])
+  const answerChatRef = useRef<ILocalMessage[]>([])
+  const [chat, setChat] = useState<ILocalMessage[]>([])
+  const chatRef = useRef<ILocalMessage[]>([])
   useEffect(() => {
     // @ts-ignore
     sock.current = new Sockjs(import.meta.env.VITE_SERVER || 'http://localhost:45000/room');
@@ -73,12 +76,51 @@ const RoomPage = () => {
       } else if (data.type === 'selfId') {
         setSelfId(data.data);
       } else if (data.type === 'message') {
-        chatRef.current = [...chatRef.current, data];
-        setChat(chatRef.current);
-        if (data.subtype === 'currentAnswer') {
+        const player = playersRef.current.find(v => v.id === data.sender)
+        if (data.subtype === "chat") {
+          chatRef.current = [...chatRef.current, {
+            data: data.data,
+            sender: player!.username
+          }]
+          setChat(chatRef.current);
+        } else if (data.subtype === 'currentAnswer') {
           setTime(10);
           setTimeMax(10);
           setDrawing('');
+        } else if (data.subtype === "info") {
+          const gameInfoMap = {
+            E_NOT_START: "游戏未开始",
+            E_SUCCESS: "你已经猜出来了",
+            E_DRAW: "想泄题吗(",
+            E_FINISHED: "本轮已结束"
+          }
+          const gameChatMap = {
+            E_SEND_ANSWER: "不许发答案"
+          }
+          type infoKey = keyof typeof gameInfoMap
+          type chatKey = keyof typeof gameChatMap
+          if (Object.keys(gameInfoMap).includes(data.data)) {
+            answerChatRef.current = [...answerChatRef.current, {
+              data: gameInfoMap[data.data as infoKey]
+            }]
+            setAnswerChat(answerChatRef.current)
+          } else if (Object.keys(gameChatMap).includes(data.data)) {
+            chatRef.current = [...chatRef.current, {
+              data: gameChatMap[data.data as chatKey]
+            }]
+            setChat(chatRef.current)
+          }
+        }
+        else if (data.subtype === "answer"){
+          const player = playersRef.current.find(v => v.id === data.sender)
+          answerChatRef.current = [...answerChatRef.current, {
+            data: data.data, 
+            sender: player?.username
+          }]
+          setAnswerChat(answerChatRef.current)
+        }
+        else {
+          console.log(data)
         }
       } else if (data.type === 'start') {
         setProgressType('determinate');
@@ -154,18 +196,18 @@ const RoomPage = () => {
           <PaintboardControl callback={controlCallback} />
         </Paper>
       )}
-      <Paper variant={'outlined'}>
-        <List>
-          {players.map((v) => (
-            <ListItem>
-              <ListItemAvatar>
-                <Avatar src={v.avatarUrl} />
-              </ListItemAvatar>
-              <ListItemText style={{ lineBreak: 'anywhere' }} primary={v.username + (v.owner ? '(Owner)' : '')} secondary={`${v.score}分`} />
-            </ListItem>
-          ))}
-        </List>
-      </Paper>
+        <Paper variant={'outlined'}>
+          <List>
+            {players.map((v) => (
+              <ListItem>
+                <ListItemAvatar>
+                  <Avatar src={v.avatarUrl} />
+                </ListItemAvatar>
+                <ListItemText style={{ lineBreak: 'anywhere' }} primary={v.username + (v.owner ? '(Owner)' : '')} secondary={`${v.score}分`} />
+              </ListItem>
+            ))}
+          </List>
+        </Paper>
       </Grid>
       <Grid item xs={12} sm={9}>
         <Paper variant={'outlined'} style={{ position: 'relative' }}>
@@ -191,7 +233,7 @@ const RoomPage = () => {
 
     <Grid container spacing={2}>
       <Grid item xs={12} sm={6}>
-        <GameChat type={'answer'} onSubmit={submitContent} chat={chat} players={players} />
+        <GameChat type={'answer'} onSubmit={submitContent} chat={answerChat} players={players} />
       </Grid>
       <Grid item xs={12} sm={6}>
         <GameChat type={'chat'} onSubmit={submitContent} chat={chat} players={players} />
