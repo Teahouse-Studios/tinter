@@ -103,15 +103,9 @@ const Paintboard = forwardRef((props: IProps, ref) => {
       }
     },
   }));
-  const onMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (disabled) return;
-    const newLoc = getLocOnCanvas(e.clientX, e.clientY);
-
+  const onPaint = (x: number, y: number) => {
     paintingRef.current = true;
-    lastPointRef.current = {
-      x: newLoc[0],
-      y: newLoc[1],
-    };
+    lastPointRef.current = {x,y};
     if (ctx && sockjs) {
       if (!erasingRef.current) {
         drawPoint(lastPointRef.current.x, lastPointRef.current.y);
@@ -131,9 +125,20 @@ const Paintboard = forwardRef((props: IProps, ref) => {
         eraser(lastPointRef.current.x, lastPointRef.current.y);
       }
     }
-  };
-  const onMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  }
+  const onMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (disabled) return;
     const newLoc = getLocOnCanvas(e.clientX, e.clientY);
+
+    onPaint(newLoc[0], newLoc[1])
+  };
+  const onTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (disabled) return;
+    let x = e.touches[0].clientX, y=e.touches[0].clientY
+    const newLoc = getLocOnCanvas(x,y)
+    onPaint(newLoc[0], newLoc[1])
+  }
+  const onMove = (newLoc: ReturnType<typeof getLocOnCanvas>) => {
     if (paintingRef.current && ctx && sockjs) {
       // ctx.moveTo(x,y);
       if (!erasingRef.current) {
@@ -158,12 +163,20 @@ const Paintboard = forwardRef((props: IProps, ref) => {
         y: newLoc[1],
       };
     }
+  }
+  const onMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const newLoc = getLocOnCanvas(e.clientX, e.clientY);
+    onMove(newLoc)
   };
+  const onTouchMove =  (e: React.TouchEvent<HTMLCanvasElement>) => {
+    const newLoc = getLocOnCanvas(e.touches[0].clientX, e.touches[0].clientY);
+    onMove(newLoc)
+  }
   const onMouseUp = () => {
     paintingRef.current = false;
   };
   return <canvas width={'1280'} height={'720'} ref={canvasRef} onMouseDown={onMouseDown} onMouseMove={onMouseMove}
-    onMouseUp={onMouseUp} style={{ width: '100%' }}>
+    onMouseUp={onMouseUp} style={{ width: '100%' }} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onMouseUp}>
 
   </canvas>;
 });

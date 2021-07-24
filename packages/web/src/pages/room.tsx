@@ -4,8 +4,10 @@ import React, {
 import SockJS from 'sockjs-client';
 import {
   Avatar,
+  Box,
   Button, Container,
   Grid, LinearProgress, List, ListItem, ListItemAvatar, ListItemText, Paper, Typography,
+  useMediaQuery, useTheme
 } from '@material-ui/core';
 import type { ServerMessageEvent, ServerWsData } from '../../../server/src/types';
 import { IPlayer } from '../types';
@@ -14,8 +16,9 @@ import PaintboardControl, { PBData } from '../components/paintboardControl';
 import GameChat, { ILocalMessage } from '../components/chat';
 import type { GAME_STATE } from '../../../server/src/game';
 import useInterval from '../components/useInterval';
-import {useHistory} from 'react-router-dom'
-import {toast} from 'react-toastify'
+import { useHistory } from 'react-router-dom'
+import { toast } from 'react-toastify'
+import './room.css'
 const Sockjs = window.SockJS as typeof SockJS;
 
 const RoomPage = () => {
@@ -38,6 +41,8 @@ const RoomPage = () => {
   const [chat, setChat] = useState<ILocalMessage[]>([])
   const chatRef = useRef<ILocalMessage[]>([])
 
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('xs'))
   const createConnection = () => {
     // @ts-ignore
     sock.current = new Sockjs(import.meta.env.VITE_SERVER || 'http://localhost:45000/room');
@@ -115,15 +120,15 @@ const RoomPage = () => {
               data: gameChatMap[data.data as chatKey]
             }]
             setChat(chatRef.current)
-          } else if(data.data === "E_NO_EMAIL"){
+          } else if (data.data === "E_NO_EMAIL") {
             alert('请先设置 email')
             history.push('/')
           }
         }
-        else if (data.subtype === "answer"){
+        else if (data.subtype === "answer") {
           const player = playersRef.current.find(v => v.id === data.sender)
           answerChatRef.current = [...answerChatRef.current, {
-            data: data.data, 
+            data: data.data,
             sender: player?.username
           }]
           setAnswerChat(answerChatRef.current)
@@ -200,58 +205,61 @@ const RoomPage = () => {
   }, 1000);
   // eslint-disable-next-line no-mixed-operators
   const progress = useMemo(() => time * 100 / timeMax, [time, timeMax]);
-  return <Container style={{ height: '90%' }}>
-    <Grid container spacing={2}>
-      <Grid item xs={12} sm={3}>{drawing && (
-        <Paper variant={'outlined'} style={{ marginBottom: 16, padding: 16 }}>
-          <Typography variant={'h5'}>{drawing}</Typography>
-          <PaintboardControl callback={controlCallback} />
-        </Paper>
-      )}
-        <Paper variant={'outlined'}>
-          <List>
-            {players.map((v) => (
-              <ListItem>
-                <ListItemAvatar>
-                  <Avatar src={v.avatarUrl} />
-                </ListItemAvatar>
-                <ListItemText style={{ lineBreak: 'anywhere' }} primary={v.username + (v.owner ? '(Owner)' : '')} secondary={`${v.score}分`} />
-              </ListItem>
-            ))}
-          </List>
-        </Paper>
-      </Grid>
-      <Grid item xs={12} sm={9}>
-        <Paper variant={'outlined'} style={{ position: 'relative' }}>
-          <Paintboard ref={paintboardRef} disabled={!drawing} sockjs={sock.current} />
-          <LinearProgress variant={progressType} value={progress} />
-          {ownerId === selfId && players.length >= 2 && !stateRef.current && !drawingRef.current && (
-            <div style={{
-              position: 'absolute',
-              width: '100%',
-              height: '100%',
-              top: 0,
-              left: 0,
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}>
-              <Button variant={'outlined'} color={'primary'} onClick={startGame}>开始</Button>
-            </div>
-          )}
-        </Paper>
-      </Grid>
-    </Grid>
-
-    <Grid container spacing={2}>
-      <Grid item xs={12} sm={6}>
-        <GameChat type={'answer'} onSubmit={submitContent} chat={answerChat} players={players} />
-      </Grid>
-      <Grid item xs={12} sm={6}>
-        <GameChat type={'chat'} onSubmit={submitContent} chat={chat} players={players} />
-      </Grid>
-    </Grid>
-  </Container>;
+  const playersList = players.map((v) => (
+    <ListItem>
+      <ListItemAvatar>
+        <Avatar src={v.avatarUrl} />
+      </ListItemAvatar>
+      <ListItemText style={{ lineBreak: 'anywhere' }} primary={v.username + (v.owner ? '(Owner)' : '')} secondary={`${v.score}分`} />
+    </ListItem>
+  ))
+  return <div id="container">
+    <div id="heightLimiter">
+      <div id="content">
+        <div id="users">
+          <Paper variant={'outlined'}>
+            <List>
+              {playersList}
+            </List>
+          </Paper>
+        </div>
+        <div id="canvas">
+          <Paper variant={'outlined'}>
+            {drawing && (
+              <Paper variant={'outlined'} style={{ marginBottom: 16, padding: 16 }}>
+                <Typography variant={'h5'}>{drawing}</Typography>
+                <PaintboardControl callback={controlCallback} />
+              </Paper>
+            )}
+            <Paintboard ref={paintboardRef} disabled={!drawing} sockjs={sock.current} />
+            <LinearProgress variant={progressType} value={progress} />
+            {ownerId === selfId && players.length >= 2 && !stateRef.current && !drawingRef.current && (
+              <div style={{
+                position: 'absolute',
+                width: '100%',
+                height: '100%',
+                top: 0,
+                left: 0,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+                <Button variant={'outlined'} color={'primary'} onClick={startGame}>开始</Button>
+              </div>
+            )}
+          </Paper>
+        </div>
+        <div id="interaction">
+          <div id="answer">
+            <GameChat type={'answer'} onSubmit={submitContent} chat={answerChat} players={players} />
+          </div>
+          <div id="chat">
+            <GameChat type={'chat'} onSubmit={submitContent} chat={chat} players={players} />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>;
 };
 
 export default RoomPage;
