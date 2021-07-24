@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import { Server } from 'http';
 import { IPlayer, ClientWsData, ServerWsData } from './types';
 import Words from './words';
+import {Logger} from './logger'
 
 type STATE_WAITING = 0;
 const STATE_WAITING = 0;
@@ -10,11 +11,15 @@ export type GAME_STATE = STATE_WAITING | string;
 
 export const WIN_SCORE = 100;
 
+const logger = new Logger('game')
+const sockLogger = new Logger('sockjs')
+const sockLog = (v: string, fmt: string, ...args: any[]) => sockLogger.debug(fmt, ...args);
+
 export default class Game {
   players: IPlayer[] = [];
   connections: Record<string, sockjs.Connection> = {};
   state: GAME_STATE = STATE_WAITING;
-  sockjs = sockjs.createServer({ prefix: '/room' });
+  sockjs = sockjs.createServer({ prefix: '/room', log: sockLog });
   currentAnswer: [string, string] = ['', ''];
   success: Record<string, boolean> = {};
   startGameInterval: any;
@@ -26,6 +31,7 @@ export default class Game {
     this.sockjs.installHandlers(server, { prefix: '/room' });
     this.startGame = this.startGame.bind(this);
     this.finishRound = this.finishRound.bind(this);
+    logger.info('started')
   }
 
   public boardcast(msg: ServerWsData) {
@@ -109,6 +115,7 @@ export default class Game {
         p.avatarUrl = `https://dn-qiniu-avatar.qbox.me/avatar/${crypto.createHash('md5').update(data.data.email).digest('hex')}.jpg`;
         p.username = data.data.username;
         this.players.push(p);
+        logger.info('player joined, %o', p)
 
         this.boardcast({
           type: 'player',
