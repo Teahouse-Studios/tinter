@@ -179,8 +179,16 @@ const Paintboard = forwardRef((props: IProps, ref) => {
   const onMouseUp = () => {
     paintingRef.current = false;
   };
-  return <canvas width={'1280'} height={'720'} ref={canvasRef} onMouseDown={onMouseDown} onMouseMove={onMouseMove}
-    onMouseUp={onMouseUp} style={{ width: '100%' }} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onMouseUp}>
+  return <canvas
+    width={'1280'} height={'720'}
+    ref={canvasRef} style={{ width: '100%' }}
+    onMouseDown={onMouseDown}
+    onMouseMove={onMouseMove}
+    onMouseOut={onMouseUp}
+    onMouseUp={onMouseUp}
+    onTouchStart={onTouchStart}
+    onTouchMove={onTouchMove}
+    onTouchEnd={onMouseUp}>
   </canvas>;
 });
 
