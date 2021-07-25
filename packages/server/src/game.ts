@@ -98,9 +98,9 @@ export default class Game {
     if (winner) {
       clearTimeout(this.startGameInterval);
       clearTimeout(this.finishRoundInterval);
+      this.resetRoom();
+      this.startGameInterval = setTimeout(this.startGame, 10000);
     }
-    this.resetRoom();
-    this.startGameInterval = setTimeout(this.startGame, 10000);
   }
 
   private onConnection(conn: sockjs.Connection) {
