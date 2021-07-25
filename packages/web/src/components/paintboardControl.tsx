@@ -15,7 +15,7 @@ interface IProps {
   callback: (data: PBData) => any
 }
 
-function RadioCard(props) {
+function RadioCard(props: any) {
   const { getInputProps, getCheckboxProps } = useRadio(props);
   const input = getInputProps();
   const checkbox = getCheckboxProps();
