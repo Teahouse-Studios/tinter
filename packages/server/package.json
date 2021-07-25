@@ -1,5 +1,5 @@
 {
-  "name": "@teahouse/guess-server",
+  "name": "@teahouse/tinter-server",
   "version": "0.0.1",
   "scripts": {
     "watch": "tsc --watch",

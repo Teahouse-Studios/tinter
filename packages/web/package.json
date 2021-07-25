@@ -1,5 +1,5 @@
 {
-  "name": "@teahouse/guess-web",
+  "name": "@teahouse/tinter-web",
   "version": "0.0.0",
   "scripts": {
     "dev": "vite --host",
