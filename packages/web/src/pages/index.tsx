@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import {Box, Button, Container, Input, Stack, Text} from "@chakra-ui/react";
+import {
+  Box, Button, Container, Input, Stack, Text,
+} from '@chakra-ui/react';
 const IndexPage = () => {
   const history = useHistory();
   const [input, setInput] = useState({
@@ -31,8 +33,8 @@ const IndexPage = () => {
       <Input placeholder={'邮箱'} name={'email'} onChange={handleChange} value={input.email}/>
     </Box>
     <Text fontSize="xl">邮箱用于 gravatar, 将会 hash 后传输至其他客户端</Text>
-    <Stack spacing={4} direction={"row"} align={"center"}>
-      <Button  colorScheme="blue" onClick={save}>保存</Button>
+    <Stack spacing={4} direction={'row'} align={'center'}>
+      <Button colorScheme="blue" onClick={save}>保存</Button>
       <Button onClick={() => {
         history.push('/room');
       }}>前往房间</Button>

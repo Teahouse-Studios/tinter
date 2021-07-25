@@ -14,7 +14,14 @@ import PaintboardControl, { PBData } from '../components/paintboardControl';
 import GameChat, { ILocalMessage } from '../components/chat';
 import useInterval from '../components/useInterval';
 import './room.css';
+import SuccessSoundFile from '../sounds/success.wav';
+import NextSoundFile from '../sounds/next.wav';
+import DrawSoundFile from '../sounds/draw.wav';
 const Sockjs = window.SockJS as typeof SockJS;
+
+const SuccessSound = new Audio(SuccessSoundFile);
+const NextSound = new Audio(NextSoundFile);
+const DrawSound = new Audio(DrawSoundFile);
 
 const RoomPage = () => {
   const toast = useToast();
@@ -98,8 +105,8 @@ const RoomPage = () => {
           setTimeMax(10);
           setDrawing('');
           answerChatRef.current = [...answerChatRef.current, {
-            sender: "正确答案",
-            data: data.data
+            sender: '正确答案',
+            data: data.data,
           }];
           setAnswerChat(answerChatRef.current);
         } else if (data.subtype === 'info') {
@@ -127,11 +134,12 @@ const RoomPage = () => {
           } else if (data.data === 'E_NO_EMAIL') {
             alert('请先设置 email');
             history.push('/');
-          } else if(data.data === 'CORRECT'){
-            if(data.data){
+          } else if (data.data === 'CORRECT') {
+            SuccessSound.play();
+            if (data.data) {
               answerChatRef.current = [...answerChatRef.current, {
                 sender: player?.username,
-                data: "猜对了"
+                data: '猜对了',
               }];
               setAnswerChat(answerChatRef.current);
             }
@@ -153,20 +161,22 @@ const RoomPage = () => {
         setTime(60);
         setTimeMax(60);
         if (data.subtype === 'guess') {
+          NextSound.play();
           stateRef.current = data.data;
           if (data.data !== selfId) {
             setDrawing('');
             drawingRef.current = '';
           }
-          if(data.data){
+          if (data.data) {
             const player = playersRef.current.find((v) => v.id === data.data);
             answerChatRef.current = [...answerChatRef.current, {
               sender: '下一个绘画者',
-              data: player?.username || "Unknown"
+              data: player?.username || 'Unknown',
             }];
             setAnswerChat(answerChatRef.current);
           }
         } else if (data.subtype === 'draw') {
+          DrawSound.play();
           stateRef.current = selfId;
           setDrawing(data.data);
           drawingRef.current = data.data;
@@ -223,7 +233,7 @@ const RoomPage = () => {
   useInterval(() => setTime(time - 1), 1000);
   // eslint-disable-next-line no-mixed-operators
   const progress = useMemo(() => time * 100 / timeMax, [time, timeMax]);
-  const sortedPlayers = useMemo(() => players.sort((a,b) => b.score - a.score), [players])
+  const sortedPlayers = useMemo(() => players.sort((a, b) => b.score - a.score), [players]);
   return <div id="container">
     <div id="content">
       <div id="users" style={{ maxHeight: document.body.clientHeight }}>
@@ -265,7 +275,7 @@ const RoomPage = () => {
               justifyContent: 'center',
               alignItems: 'center',
             }}>
-              <Button colorScheme="blue" size={"lg"} onClick={startGame}>开始</Button>
+              <Button colorScheme="blue" size={'lg'} onClick={startGame}>开始</Button>
             </div>
           )}
         </div>
