@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { IconButton, Typography } from '@material-ui/core';
-import { Clear, Edit } from '@material-ui/icons';
-import { Eraser } from 'mdi-material-ui';
+import { Button } from '@blueprintjs/core';
 
 export interface PBData {
   type: 'clear' | 'edit_mode' | 'eraser_mode' | 'color'
@@ -9,6 +7,7 @@ export interface PBData {
 }
 
 interface IProps {
+  drawing: string
   callback: (data: PBData) => any
 }
 
@@ -25,23 +24,15 @@ const PaintboardControl: React.FunctionComponent<IProps> = ({ drawing, callback 
     });
   }, [color]);
   return <div>
-    <Typography>
-      {drawing}
-      <IconButton onClick={() => callback({ type: 'edit_mode' })}>
-        <Edit />
-      </IconButton>
-      <IconButton onClick={() => callback({ type: 'eraser_mode' })}>
-        <Eraser />
-      </IconButton>
-      <IconButton onClick={() => callback({ type: 'clear' })}>
-        <Clear />
-      </IconButton>
-    </Typography>
-    <input type={'color'} className="colorSelect" style={{ width: 64, height: 32 }} onChange={(e) => setColor(e.target.value)} value={color} />
+    {drawing}
+    <br />
+    <Button onClick={() => callback({ type: 'edit_mode' })} icon="edit" />
+    <Button onClick={() => callback({ type: 'eraser_mode' })} icon="eraser" />
+    <Button onClick={() => callback({ type: 'clear' })} icon="clean" />
+    <br />
+    <input type={'color'} className="colorSelect" onChange={(e) => setColor(e.target.value)} value={color} />
     {colors.map((v) => (
-      <div style={{ backgroundColor: v }}
-        className="colorButton"
-        onClick={() => setColor(v)} />
+      <div style={{ backgroundColor: v }} className="colorButton" onClick={() => setColor(v)} />
     ))}
   </div>;
 };

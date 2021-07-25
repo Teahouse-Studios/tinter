@@ -6,7 +6,14 @@
   position: relative;
   left: 10%;
   width: 80%;
-  top: 40px;
+  top: 0px;
+}
+
+html body {
+  background-color: white;
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
 }
 
 .colorButton{
@@ -17,23 +24,15 @@
   margin: 0;
 }
 
-@media (max-width: 1000px){
-  #root{
-  left: 0px !important;
-  width: 100% !important;
-  top: 0px !important;
-  }
-  .colorSelect {
-    display:none;
-  }
+.colorSelect{
+  width: 64px;
+  height: 32px;
 }
 
-html body {
-  background-color: white;
-  display: flex;
-  flex-direction: row;
-  overflow: hidden;
+canvas {
+  aspect-ratio: unset;
 }
+
 
 #container {
   position: relative;
@@ -48,34 +47,59 @@ html body {
   flex: 1;
   min-height: 0;
   grid-template-areas:
-    "a b"
-    "a c";
+    "a b b"
+    "a c d";
 }
-
 #users {
+  max-width: 280px;
     grid-area: a;
     display: flex;
+    overflow: scroll;
 }
-
-canvas {
-  aspect-ratio: unset;
-}
-
 #canvas {
     position: relative;
     grid-area: b;
     height: fit-content;
 }
-
+.bp3-card{
+  padding: 0 !important;
+}
 #interaction {
     grid-area: c;
     display: flex;
-    flex-direction: row
 }
-
 #answer, #chat {
-zoom:0.9;
     flex: 1;
     display: flex;
-    flex-direction: column;
 }
+#answer{
+  grid-area: c;
+  flex: 1;
+}
+#chat{
+  grid-area: d;
+  flex: 1;
+}
+@media (max-width: 1000px){
+  #root{
+  left: 0px;
+  width: 100%;
+  top: 0px;
+  }
+  .colorSelect {
+    display:none;
+  }
+  #content {
+    grid-template-areas:
+      "b b"
+      "a c"
+      "a d";
+  }
+  #users{
+    min-width: 90px;
+  }
+  #users>div>ul{
+    display:none;
+  }
+}
+
