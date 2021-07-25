@@ -78,6 +78,10 @@ canvas {
   grid-area: d;
   flex: 1;
 }
+#users {
+  min-width: 170px;
+}
+
 @media (max-width: 1000px) {
   #root {
     left: 0px;
@@ -94,7 +98,7 @@ canvas {
       "a d";
   }
   #users {
-    min-width: 300px;
+    min-width: 50px;
   }
   #users > div > ul {
     display: none;

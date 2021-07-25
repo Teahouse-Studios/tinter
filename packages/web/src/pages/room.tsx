@@ -5,7 +5,7 @@ import SockJS from 'sockjs-client';
 import { useHistory } from 'react-router-dom';
 
 import {
-  Avatar, Grid, GridItem, Progress, Text, useToast,
+  Avatar, Button, Grid, GridItem, Progress, Text, useToast,
 } from '@chakra-ui/react';
 import type { ServerWsData, GAME_STATE } from '../../../server/src/types';
 import { IPlayer } from '../types';
@@ -97,6 +97,11 @@ const RoomPage = () => {
           setTime(10);
           setTimeMax(10);
           setDrawing('');
+          answerChatRef.current = [...answerChatRef.current, {
+            sender: "正确答案",
+            data: data.data
+          }];
+          setAnswerChat(answerChatRef.current);
         } else if (data.subtype === 'info') {
           const gameInfoMap = {
             E_NOT_START: '游戏未开始',
@@ -122,6 +127,14 @@ const RoomPage = () => {
           } else if (data.data === 'E_NO_EMAIL') {
             alert('请先设置 email');
             history.push('/');
+          } else if(data.data === 'CORRECT'){
+            if(data.data){
+              answerChatRef.current = [...answerChatRef.current, {
+                sender: player?.username,
+                data: "猜对了"
+              }];
+              setAnswerChat(answerChatRef.current);
+            }
           }
         } else if (data.subtype === 'answer') {
           const p = playersRef.current.find((v) => v.id === data.sender);
@@ -144,6 +157,14 @@ const RoomPage = () => {
           if (data.data !== selfId) {
             setDrawing('');
             drawingRef.current = '';
+          }
+          if(data.data){
+            const player = playersRef.current.find((v) => v.id === data.data);
+            answerChatRef.current = [...answerChatRef.current, {
+              sender: '下一个绘画者',
+              data: player?.username || "Unknown"
+            }];
+            setAnswerChat(answerChatRef.current);
           }
         } else if (data.subtype === 'draw') {
           stateRef.current = selfId;
@@ -201,7 +222,8 @@ const RoomPage = () => {
   }, [players]);
   useInterval(() => setTime(time - 1), 1000);
   // eslint-disable-next-line no-mixed-operators
-  const progress = useMemo(() => time * 100 / timeMax / 100, [time, timeMax]);
+  const progress = useMemo(() => time * 100 / timeMax, [time, timeMax]);
+  const sortedPlayers = useMemo(() => players.sort((a,b) => b.score - a.score), [players])
   return <div id="container">
     <div id="content">
       <div id="users" style={{ maxHeight: document.body.clientHeight }}>
@@ -209,7 +231,7 @@ const RoomPage = () => {
           {drawing && <PaintboardControl drawing={drawing} callback={controlCallback} />}
           {/* <button onClick={() => { document.body.requestFullscreen(); }}>EnterFullScreen</button> */}
           <div>
-            {players.map((v) => (
+            {sortedPlayers.map((v) => (
               <Grid templateRows={'repeat(2, 1fr)'} templateColumns={'repeat(2, 1fr)'}>
                 <GridItem rowSpan={2} colSpan={1}>
 
@@ -243,7 +265,7 @@ const RoomPage = () => {
               justifyContent: 'center',
               alignItems: 'center',
             }}>
-              <button color={'primary'} onClick={startGame}>开始</button>
+              <Button colorScheme="blue" size={"lg"} onClick={startGame}>开始</Button>
             </div>
           )}
         </div>
