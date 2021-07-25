@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Button } from '@blueprintjs/core';
-
+import { IconButton } from '@chakra-ui/react';
+import { Clear, Edit, RemoveCircle } from '@material-ui/icons';
 export interface PBData {
   type: 'clear' | 'edit_mode' | 'eraser_mode' | 'color'
   data?: string
@@ -26,9 +26,15 @@ const PaintboardControl: React.FunctionComponent<IProps> = ({ drawing, callback 
   return <div>
     {drawing}
     <br />
-    <Button onClick={() => callback({ type: 'edit_mode' })} icon="edit" />
-    <Button onClick={() => callback({ type: 'eraser_mode' })} icon="eraser" />
-    <Button onClick={() => callback({ type: 'clear' })} icon="clean" />
+    <IconButton onClick={() => callback({ type: 'edit_mode' })} icon={
+      <Edit />
+    } aria-label={'绘画'}/>
+    <IconButton onClick={() => callback({ type: 'eraser_mode' })} icon={
+      <RemoveCircle />
+    } aria-label={'橡皮'}/>
+    <IconButton onClick={() => callback({ type: 'clear' })} icons={
+      <Clear />
+    } aria-label={'清屏'}/>
     <br />
     <input type={'color'} className="colorSelect" onChange={(e) => setColor(e.target.value)} value={color} />
     {colors.map((v) => (

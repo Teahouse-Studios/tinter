@@ -1,13 +1,11 @@
-import { Card } from '@blueprintjs/core';
 import React, {
   useEffect, useRef, useState,
 } from 'react';
-import { IPlayer } from '../types';
+import { Input } from '@chakra-ui/react';
 interface IProps {
   type: 'answer' | 'chat'
   onSubmit: (type: 'answer' | 'chat', message: string) => any
   chat: ILocalMessage[]
-  players: IPlayer[]
 }
 
 export interface ILocalMessage {
@@ -24,7 +22,7 @@ const GameChat: React.FunctionComponent<IProps> = ({
   useEffect(() => {
     listDom.current?.scrollTo(0, listDom.current.scrollHeight);
   }, [chat]);
-  return <Card style={{
+  return <div style={{
     padding: 16, height: '100%', width: '100%', display: 'flex', flexDirection: 'column',
   }}>
     <div style={{ alignItems: 'flex-start', flexGrow: 1 }}>
@@ -40,9 +38,9 @@ const GameChat: React.FunctionComponent<IProps> = ({
       onSubmit(type, input);
       setInput('');
     }} style={{ alignItems: 'stretch' }}>
-      <input placeholder={'输入内容'} onChange={(e) => setInput(e.target.value)} autoComplete={'off'} value={input} />
+      <Input placeholder={'输入内容'} onChange={(e) => setInput(e.target.value)} autoComplete={'off'} value={input} />
     </form>
-  </Card>;
+  </div>;
 };
 
 export default GameChat;

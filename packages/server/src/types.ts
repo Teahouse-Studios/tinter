@@ -69,3 +69,5 @@ declare module 'sockjs' {
     info: (msg: string) => void;
   }
 }
+type STATE_WAITING = 0;
+export type GAME_STATE = STATE_WAITING | string;

@@ -3,32 +3,21 @@ import React, {
 } from 'react';
 import SockJS from 'sockjs-client';
 import { useHistory } from 'react-router-dom';
+
 import {
-  Button, Card, Intent, Menu, MenuItem, Position, ProgressBar, Toaster,
-} from '@blueprintjs/core';
-import type { ServerWsData } from '../../../server/src/types';
+  Avatar, Grid, GridItem, Progress, Text, useToast,
+} from '@chakra-ui/react';
+import type { ServerWsData, GAME_STATE } from '../../../server/src/types';
 import { IPlayer } from '../types';
 import Paintboard from '../components/paintboard';
 import PaintboardControl, { PBData } from '../components/paintboardControl';
 import GameChat, { ILocalMessage } from '../components/chat';
-import type { GAME_STATE } from '../../../server/src/game';
 import useInterval from '../components/useInterval';
 import './room.css';
 const Sockjs = window.SockJS as typeof SockJS;
 
-const ToasterContainer = document.createElement('div');
-ToasterContainer.style.position = 'fixed';
-ToasterContainer.style.bottom = '0px';
-ToasterContainer.style.zIndex = '9999';
-document.body.append(ToasterContainer);
-
-const AppToaster = Toaster.create({
-  className: 'recipe-toaster',
-  position: Position.TOP,
-  usePortal: true,
-}, ToasterContainer);
-
 const RoomPage = () => {
+  const toast = useToast();
   const history = useHistory();
   const sock = useRef<WebSocket | null>(null);
   const paintboardRef = useRef<HTMLInputElement | null>(null);
@@ -53,7 +42,9 @@ const RoomPage = () => {
     sock.current = new Sockjs(import.meta.env.VITE_SERVER || 'http://localhost:45000/room');
     const current = sock!.current;
     current.onopen = () => {
-      AppToaster.show({ message: '服务器连接成功', intent: Intent.SUCCESS });
+      toast({
+        title: '服务器连接成功',
+      });
       // @ts-ignore
       let user = {
         username: Math.random(),
@@ -72,7 +63,10 @@ const RoomPage = () => {
     };
     current.onclose = (msg) => {
       console.log(msg);
-      AppToaster.show({ message: '连接中断, 5秒后重试', intent: Intent.DANGER });
+      toast({
+        status: 'error',
+        title: '连接中断, 5秒后重试',
+      });
       setTimeout(createConnection, 5000);
     };
     current.onmessage = (msg) => {
@@ -174,6 +168,8 @@ const RoomPage = () => {
     };
   };
   useEffect(() => {
+    console.log('createS');
+    sock.current?.close();
     createConnection();
     return () => {
       sock.current?.close();
@@ -209,22 +205,33 @@ const RoomPage = () => {
   return <div id="container">
     <div id="content">
       <div id="users" style={{ maxHeight: document.body.clientHeight }}>
-        <Card>
+        <div>
           {drawing && <PaintboardControl drawing={drawing} callback={controlCallback} />}
-          <Button onClick={() => { document.body.requestFullscreen(); }}>EnterFullScreen</Button>
-          <Menu>
+          {/* <button onClick={() => { document.body.requestFullscreen(); }}>EnterFullScreen</button> */}
+          <div>
             {players.map((v) => (
-              <MenuItem icon={<img width="40px" src={v.avatarUrl} />} text={(
-                <p>{v.username + (v.owner ? '(Owner)' : '')}<br />{v.score}分</p>
-              )} />
+              <Grid templateRows={'repeat(2, 1fr)'} templateColumns={'repeat(2, 1fr)'}>
+                <GridItem rowSpan={2} colSpan={1}>
+
+                  <Avatar src={v.avatarUrl} />
+                </GridItem>
+                <GridItem>
+                  <Text>
+                    {v.username}
+                  </Text>
+                </GridItem>
+                <GridItem>
+                  <Text>{v.score}</Text>
+                </GridItem>
+              </Grid>
             ))}
-          </Menu>
-        </Card>
+          </div>
+        </div>
       </div>
       <div id="canvas">
-        <Card>
+        <div>
           <Paintboard ref={paintboardRef} disabled={!drawing} sockjs={sock.current} />
-          <ProgressBar stripes={false} intent={Intent.PRIMARY} value={progressType === 'indeterminate' ? undefined : progress} />
+          <Progress isIndeterminate={progressType === 'indeterminate'} value={progress} />
           {ownerId === selfId && players.length >= 2 && !stateRef.current && !drawingRef.current && (
             <div style={{
               position: 'absolute',
@@ -236,16 +243,16 @@ const RoomPage = () => {
               justifyContent: 'center',
               alignItems: 'center',
             }}>
-              <Button color={'primary'} onClick={startGame}>开始</Button>
+              <button color={'primary'} onClick={startGame}>开始</button>
             </div>
           )}
-        </Card>
+        </div>
       </div>
       <div id="answer">
-        <GameChat type={'answer'} onSubmit={submitContent} chat={answerChat} players={players} />
+        <GameChat type={'answer'} onSubmit={submitContent} chat={answerChat} />
       </div>
       <div id="chat">
-        <GameChat type={'chat'} onSubmit={submitContent} chat={chat} players={players} />
+        <GameChat type={'chat'} onSubmit={submitContent} chat={chat} />
       </div>
     </div>
   </div >;

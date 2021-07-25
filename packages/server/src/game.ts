@@ -1,13 +1,13 @@
 import sockjs from 'sockjs';
 import crypto from 'crypto';
 import { Server } from 'http';
-import { IPlayer, ClientWsData, ServerWsData } from './types';
+import {
+  IPlayer, ClientWsData, ServerWsData, GAME_STATE,
+} from './types';
 import Words from './words';
 import { Logger } from './logger';
 
-type STATE_WAITING = 0;
 const STATE_WAITING = 0;
-export type GAME_STATE = STATE_WAITING | string;
 
 export const WIN_SCORE = 100;
 

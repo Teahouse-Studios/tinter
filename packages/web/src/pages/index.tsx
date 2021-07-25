@@ -1,4 +1,3 @@
-import { Button, Card } from '@blueprintjs/core';
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 const IndexPage = () => {
@@ -25,15 +24,15 @@ const IndexPage = () => {
     localStorage.setItem('user', JSON.stringify(input));
     alert('保存成功');
   };
-  return <Card>
+  return <div>
     <input placeholder={'昵称'} name={'username'} onChange={handleChange} value={input.username}/>
     <input placeholder={'邮箱'} name={'email'} onChange={handleChange} value={input.email}/>
     <h2>邮箱用于 gravatar, 将会 hash 后传输至其他客户端</h2>
-    <Button color={'primary'} onClick={save}>保存</Button>
-    <Button color={'primary'} onClick={() => {
+    <button color={'primary'} onClick={save}>保存</button>
+    <button color={'primary'} onClick={() => {
       history.push('/room');
-    }}>前往房间</Button>
-  </Card>;
+    }}>前往房间</button>
+  </div>;
 };
 
 export default IndexPage;

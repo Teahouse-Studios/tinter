@@ -7,7 +7,12 @@
     "serve": "vite preview"
   },
   "dependencies": {
-    "@blueprintjs/core": "^3.47.0",
+    "@chakra-ui/react": "^1.6.5",
+    "@emotion/react": "11",
+    "@emotion/styled": "11",
+    "@material-ui/core": "^4.12.2",
+    "@material-ui/icons": "^4.11.2",
+    "framer-motion": "4",
     "react": "^17.0.0",
     "react-dom": "^17.0.0",
     "react-router-dom": "^5.2.0",

@@ -1,4 +1,5 @@
 // https://github.com/koishijs/koishi/blob/d11151502102eba899cca878c4ed5fa7f1d1dcfb/packages/koishi-utils/src/logger.ts
+/* eslint-disable */
 
 import { inspect, InspectOptions, format } from 'util';
 import { clearScreenDown, cursorTo } from 'readline';
