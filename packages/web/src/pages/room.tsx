@@ -244,7 +244,6 @@ const RoomPage = () => {
             {sortedPlayers.map((v) => (
               <Grid templateRows={'repeat(2, 1fr)'} templateColumns={'repeat(2, 1fr)'}>
                 <GridItem rowSpan={2} colSpan={1}>
-
                   <Avatar src={v.avatarUrl} />
                 </GridItem>
                 <GridItem>

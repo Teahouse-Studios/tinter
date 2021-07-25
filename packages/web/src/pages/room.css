@@ -7,6 +7,7 @@
   left: 10%;
   width: 80%;
   top: 0px;
+  max-width: 1180px;
 }
 
 html body {
@@ -79,7 +80,7 @@ canvas {
   flex: 1;
 }
 #users {
-  min-width: 170px;
+  min-width: 190px;
 }
 
 @media (max-width: 1000px) {

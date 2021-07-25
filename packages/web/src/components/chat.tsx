@@ -29,12 +29,13 @@ const GameChat: React.FunctionComponent<IProps> = ({
       <h2>{type === 'answer' ? '猜' : '聊天'}</h2>
       <div style={{ overflowY: 'scroll', height: '100px' }} ref={listDom}>
         {chat.map((v, i) => (
-          <div key={i} style={{ lineBreak: 'anywhere' }}>{v.sender} {v.data}</div>
+          <div key={i} style={{ lineBreak: 'anywhere' }}><b>{v.sender}</b> {v.data}</div>
         ))}
       </div>
     </div>
     <form onSubmit={(e) => {
       e.preventDefault();
+      if (!input.trim()) return;
       onSubmit(type, input);
       setInput('');
     }} style={{ alignItems: 'stretch' }}>

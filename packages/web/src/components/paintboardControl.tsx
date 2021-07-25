@@ -1,14 +1,47 @@
 import React, { useEffect, useState } from 'react';
-import {IconButton, Stack} from '@chakra-ui/react';
-import { Clear, Edit, RemoveCircle } from '@material-ui/icons';
+import {
+  Box, Stack, useRadio, useRadioGroup,
+} from '@chakra-ui/react';
+import {
+  Clear, Edit, RemoveCircle, SkipNext,
+} from '@material-ui/icons';
 export interface PBData {
-  type: 'clear' | 'edit_mode' | 'eraser_mode' | 'color'
+  type: 'clear' | 'edit_mode' | 'eraser_mode' | 'color' | 'skip'
   data?: string
 }
 
 interface IProps {
   drawing: string
   callback: (data: PBData) => any
+}
+
+function RadioCard(props) {
+  const { getInputProps, getCheckboxProps } = useRadio(props);
+  const input = getInputProps();
+  const checkbox = getCheckboxProps();
+  return (
+    <Box as="label">
+      <input {...input} />
+      <Box
+        {...checkbox}
+        cursor="pointer"
+        borderRadius="md"
+        boxShadow="md"
+        _checked={{
+          bg: 'teal.600',
+          color: 'white',
+          borderColor: 'teal.600',
+        }}
+        _focus={{
+          boxShadow: 'outline',
+        }}
+        px={2}
+        py={1}
+      >
+        {props.children}
+      </Box>
+    </Box>
+  );
 }
 
 const colors = ['#000000', '#666666', '#0017f6', '#ffffff', '#aaaaaa',
@@ -23,19 +56,26 @@ const PaintboardControl: React.FunctionComponent<IProps> = ({ drawing, callback 
       data: color,
     });
   }, [color]);
+  const options: [string, any][] = [
+    ['edit_mode', <Edit />],
+    ['eraser_mode', <RemoveCircle />],
+    ['clear', <Clear />],
+    ['skip', <SkipNext />],
+  ];
+  const { getRootProps, getRadioProps } = useRadioGroup({
+    name: 'mode',
+    defaultValue: 'edit_mode',
+    onChange: (s) => callback({ type: s as any }),
+  });
+  const group = getRootProps();
   return <div>
     {drawing}
     <br />
-    <Stack spacing={2}  direction={"row"} align={"center"}>
-      <IconButton onClick={() => callback({ type: 'edit_mode' })} icon={
-        <Edit />
-      } aria-label={'绘画'}/>
-      <IconButton onClick={() => callback({ type: 'eraser_mode' })} icon={
-        <RemoveCircle />
-      } aria-label={'橡皮'}/>
-      <IconButton onClick={() => callback({ type: 'clear' })} icon={
-        <Clear />
-      } aria-label={'清屏'}/>
+    <Stack {...group} spacing={2} direction={'row'} align={'center'}>
+      {options.map(([value, icon]) => {
+        const radio = getRadioProps({ value });
+        return <RadioCard key={value} {...radio}>{icon}</RadioCard>;
+      })}
     </Stack>
     <br />
     <input type={'color'} className="colorSelect" onChange={(e) => setColor(e.target.value)} value={color} />

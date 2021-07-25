@@ -82,6 +82,10 @@ const Paintboard = forwardRef((props: IProps, ref) => {
           ctx.strokeStyle = data.data as string;
           colorRef.current = data.data as string;
         }
+      } else if (data.type === 'skip') {
+        sockjs?.send(JSON.stringify({
+          type: 'skip',
+        }));
       }
     },
     draw(data: DrawEvent) {
