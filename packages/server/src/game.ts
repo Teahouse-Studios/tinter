@@ -58,12 +58,7 @@ export default class Game {
   public startGame() {
     if (this.players.length < 2) return false;
     this.startTime = new Date().valueOf();
-    if (global.Hydro.service.db) {
-      this.currentAnswer = global.Hydro.service.db.collection('tinter')
-        .aggregate([{ $sample: { size: 2 } }]).toArray().map((i) => i.word);
-    } else {
-      this.currentAnswer = [Words[Math.floor(Math.random() * Words.length)], Words[Math.floor(Math.random() * Words.length)]];
-    }
+    this.currentAnswer = [Words[Math.floor(Math.random() * Words.length)], Words[Math.floor(Math.random() * Words.length)]];
     this.state = this.players[0].id;
     this.players.push(this.players.shift());
     this.boardcast({ type: 'start', subtype: 'guess', data: this.state });
@@ -127,7 +122,7 @@ export default class Game {
       const data = JSON.parse(msg) as ClientWsData;
 
       if (data.type === 'hello') {
-        p.avatarUrl = `https://dn-qiniu-avatar.qbox.me/avatar/${crypto.createHash('md5').update(data.data.email).digest('hex')}.jpg`;
+        p.avatarUrl = `https://dn-qiniu-avatar.qbox.me/avatar/${crypto.createHash('md5').update(data.data.email || '').digest('hex')}.jpg`;
         p.username = data.data.username;
         if (!data.data.email) {
           conn.send({
