@@ -18,6 +18,7 @@ const GameChat: React.FunctionComponent<IProps> = ({
   type, onSubmit, chat,
 }) => {
   const [input, setInput] = useState('');
+  const [focus, setFocus] = useState(false);
   const listDom = useRef<HTMLDivElement>(null);
   useEffect(() => {
     listDom.current?.scrollTo(0, listDom.current.scrollHeight);
@@ -39,7 +40,15 @@ const GameChat: React.FunctionComponent<IProps> = ({
       onSubmit(type, input);
       setInput('');
     }} style={{ alignItems: 'stretch' }}>
-      <Input placeholder={'输入内容'} onChange={(e) => setInput(e.target.value)} autoComplete={'off'} value={input} />
+      <Input
+        tabIndex={focus ? 1 : type === 'answer' ? 2 : 3}
+        onFocus={() => setFocus(true)}
+        onBlur={() => setFocus(false)}
+        placeholder={'输入内容'}
+        onChange={(e) => setInput(e.target.value)}
+        autoComplete={'off'}
+        value={input}
+      />
     </form>
   </div>;
 };
