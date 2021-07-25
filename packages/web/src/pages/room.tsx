@@ -60,6 +60,10 @@ const RoomPage = () => {
       if (localStorage.getItem('user')) {
         user = JSON.parse(localStorage.getItem('user') || '');
       }
+      if ((window as any).UserContext) {
+        user.username = (window as any).UserContext.uname;
+        user.email = (window as any).UserContext.mail;
+      }
       current.send(JSON.stringify({
         type: 'hello',
         data: user,
@@ -203,9 +207,7 @@ const RoomPage = () => {
     console.log('createS');
     sock.current?.close();
     createConnection();
-    return () => {
-      sock.current?.close();
-    };
+    return () => sock.current?.close();
   }, []);
   const controlCallback = (data: PBData) => {
     console.log(data);
