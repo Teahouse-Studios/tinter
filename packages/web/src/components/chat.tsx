@@ -1,4 +1,5 @@
 import React, {
+  ReactElement,
   useEffect, useRef, useState,
 } from 'react';
 import { Input } from '@chakra-ui/react';
@@ -9,8 +10,8 @@ interface IProps {
 }
 
 export interface ILocalMessage {
-  sender?: string;
-  data: string;
+  sender?: string | ReactElement<any, any>;
+  data: string | ReactElement<any, any>;
   color?: string;
 }
 

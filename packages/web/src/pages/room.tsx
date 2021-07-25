@@ -123,7 +123,7 @@ const RoomPage = () => {
           type chatKey = keyof typeof gameChatMap;
           if (Object.keys(gameInfoMap).includes(data.data)) {
             answerChatRef.current = [...answerChatRef.current, {
-              data: gameInfoMap[data.data as infoKey],
+              data: <span style={{ color: 'blue' }}>{gameInfoMap[data.data as infoKey]}</span>,
             }];
             setAnswerChat(answerChatRef.current);
           } else if (Object.keys(gameChatMap).includes(data.data)) {
@@ -135,11 +135,12 @@ const RoomPage = () => {
             alert('请先设置 email');
             history.push('/');
           } else if (data.data === 'CORRECT') {
+            SuccessSound.load();
             SuccessSound.play();
             if (data.data) {
               answerChatRef.current = [...answerChatRef.current, {
-                sender: player?.username,
-                data: '猜对了',
+                sender: <span style={{ color: 'green' }}>{player?.username}</span>,
+                data: <span style={{ color: 'green' }}>猜对了</span>,
               }];
               setAnswerChat(answerChatRef.current);
             }
