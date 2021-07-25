@@ -9,7 +9,7 @@ const page = new Hydro.NamedPage('hydroAutoload', () => {
     <React.StrictMode>
       <App />
     </React.StrictMode>,
-    document.getElementById('root'),
+    document.getElementById('tinter'),
   );
 });
 Hydro.extraPages.push(page);

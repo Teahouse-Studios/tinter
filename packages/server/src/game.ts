@@ -58,9 +58,13 @@ export default class Game {
   public startGame() {
     if (this.players.length < 2) return false;
     this.startTime = new Date().valueOf();
-    this.currentAnswer = [Words[Math.floor(Math.random() * Words.length)], Words[Math.floor(Math.random() * Words.length)]];
+    if (global.Hydro.service.db) {
+      this.currentAnswer = global.Hydro.service.db.collection('tinter')
+        .aggregate([{ $sample: { size: 2 } }]).toArray().map((i) => i.word);
+    } else {
+      this.currentAnswer = [Words[Math.floor(Math.random() * Words.length)], Words[Math.floor(Math.random() * Words.length)]];
+    }
     this.state = this.players[0].id;
-    // @ts-ignore
     this.players.push(this.players.shift());
     this.boardcast({ type: 'start', subtype: 'guess', data: this.state });
     this.connections[this.state].send({ type: 'start', subtype: 'draw', data: this.currentAnswer.join(' 或 ') });

@@ -1,4 +1,4 @@
-#root {
+#tinter {
   display: flex;
   justify-content: center;
   flex-direction: column;
@@ -8,12 +8,6 @@
   width: 80%;
   top: 0px;
   max-width: 1180px;
-}
-
-html body {
-  background-color: white;
-  display: flex;
-  flex-direction: row;
   overflow: hidden;
   -moz-user-select:none; /*火狐*/
   -webkit-user-select:none; /*webkit浏览器*/
@@ -22,7 +16,7 @@ html body {
   user-select:none;
 }
 
-.colorButton {
+#tinter .colorButton {
   width: 32px;
   height: 32px;
   display: inline-block;
@@ -30,23 +24,23 @@ html body {
   margin: 0;
 }
 
-.colorSelect {
+#tinter .colorSelect {
   width: 64px;
   height: 32px;
 }
 
-canvas {
+#tinter canvas {
   aspect-ratio: unset;
 }
 
-#container {
+#tinter #container {
   position: relative;
   display: flex;
   flex-direction: column;
   flex: 1 0 auto;
 }
 
-#content {
+#tinter #content {
   grid-template-rows: auto 1fr;
   display: grid;
   flex: 1;
@@ -55,58 +49,54 @@ canvas {
     "a b b"
     "a c d";
 }
-#users {
+#tinter #users {
+  min-width: 190px;
   max-width: 280px;
   grid-area: a;
   display: flex;
   overflow: scroll;
 }
-#canvas {
+#tinter #canvas {
   position: relative;
   grid-area: b;
   height: fit-content;
 }
 
-#interaction {
+#tinter #interaction {
   grid-area: c;
   display: flex;
 }
-#answer,
-#chat {
+#tinter #answer,
+#tinter #chat {
   flex: 1;
   display: flex;
 }
-#answer {
+#tinter #answer {
   grid-area: c;
-  flex: 1;
 }
-#chat {
+#tinter #chat {
   grid-area: d;
-  flex: 1;
-}
-#users {
-  min-width: 190px;
 }
 
 @media (max-width: 1000px) {
-  #root {
+  #tinter #root {
     left: 0px;
     width: 100%;
     top: 0px;
   }
-  .colorSelect {
+  #tinter .colorSelect {
     display: none;
   }
-  #content {
+  #tinter #content {
     grid-template-areas:
       "b b"
       "a c"
       "a d";
   }
-  #users {
+  #tinter #users {
     min-width: 50px;
   }
-  #users > div > ul {
+  #tinter #users > div > ul {
     display: none;
   }
 }
