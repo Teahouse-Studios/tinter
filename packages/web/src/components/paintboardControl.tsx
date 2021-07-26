@@ -5,6 +5,8 @@ import {
 import {
   Clear, Edit, RemoveCircle, SkipNext,
 } from '@material-ui/icons';
+
+import Eraser from '../assets/eraser.svg?component';
 export interface PBData {
   type: 'clear' | 'edit_mode' | 'eraser_mode' | 'color' | 'skip'
   data?: string
@@ -58,7 +60,7 @@ const PaintboardControl: React.FunctionComponent<IProps> = ({ drawing, callback 
   }, [color]);
   const options: [string, any][] = [
     ['edit_mode', <Edit />],
-    ['eraser_mode', <RemoveCircle />],
+    ['eraser_mode', <Eraser />],
     ['clear', <Clear />],
     ['skip', <SkipNext />],
   ];

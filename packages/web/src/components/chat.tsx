@@ -17,7 +17,7 @@ export interface ILocalMessage {
 }
 
 const GameChat: React.FunctionComponent<IProps> = ({
-  type, onSubmit, chat, disabled
+  type, onSubmit, chat, disabled,
 }) => {
   const [input, setInput] = useState('');
   const [focus, setFocus] = useState(false);
