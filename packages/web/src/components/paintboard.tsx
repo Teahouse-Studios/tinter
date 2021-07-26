@@ -186,6 +186,10 @@ const Paintboard = forwardRef((props: IProps, ref) => {
     onMouseMove={onMouseMove}
     onMouseOut={onMouseUp}
     onMouseUp={onMouseUp}
+    onPointerDown={onMouseDown}
+    onPointerMove={onMouseMove}
+    onPointerUp={onMouseUp}
+    onPointerLeave={onMouseUp}
     onTouchStart={onTouchStart}
     onTouchMove={onTouchMove}
     onTouchEnd={onMouseUp}>
