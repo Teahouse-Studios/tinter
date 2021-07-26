@@ -248,7 +248,7 @@ const RoomPage = () => {
       setProgressType('indeterminate');
     }
   }, [players]);
-  useInterval(() => setTime(time - 1), 1000);
+  useInterval(() => setTime(time - 0.05), 50);
   // eslint-disable-next-line no-mixed-operators
   const progress = useMemo(() => time * 100 / timeMax, [time, timeMax]);
   const sortedPlayers = useMemo(() => players.sort((a, b) => b.score - a.score), [players]);
@@ -317,7 +317,7 @@ const RoomPage = () => {
         </div>
       </div>
       <div id="answer">
-        <GameChat type={'answer'} onSubmit={submitContent} chat={answerChat} disabled={success[selfId] || stateRef.current === selfId}/>
+        <GameChat type={'answer'} onSubmit={submitContent} chat={answerChat} disabled={success[selfId] || stateRef.current === selfId} />
       </div>
       <div id="chat">
         <GameChat type={'chat'} onSubmit={submitContent} chat={chat} />
