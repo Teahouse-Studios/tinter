@@ -59,6 +59,7 @@
   position: relative;
   grid-area: b;
   height: fit-content;
+  background-color: grey;
 }
 
 #tinter #interaction {
