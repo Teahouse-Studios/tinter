@@ -78,9 +78,9 @@ const PaintboardControl: React.FunctionComponent<IProps> = ({ drawing, callback 
         const radio = getRadioProps({ value });
         return <RadioCard key={value} {...radio}>{icon}</RadioCard>;
       })}
+      <input type={'color'} className="colorSelect" onChange={(e) => setColor(e.target.value)} value={color} />
     </Stack>
     <br />
-    <input type={'color'} className="colorSelect" onChange={(e) => setColor(e.target.value)} value={color} />
     {colors.map((v) => <div key={v} style={{ backgroundColor: v }} className="colorButton" onClick={() => setColor(v)} />)}
   </Box>;
 };

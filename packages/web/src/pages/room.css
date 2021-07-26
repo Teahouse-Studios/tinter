@@ -53,13 +53,31 @@
   max-width: 280px;
   grid-area: a;
   display: flex;
- /* overflow: scroll;*/
+  background-color: #FCFCFC;
+  overflow-y: scroll;
+  overflow-x: hidden;
 }
 #tinter #canvas {
   position: relative;
   grid-area: b;
   height: fit-content;
-  background-color: grey;
+  background-color: #DDDDDD;
+}
+#tinter ::-webkit-scrollbar{
+  width: 2px;
+}
+
+#tinter ::-webkit-scrollbar-track{
+  -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.2);
+  box-shadow: inset 0 0 6px rgba(0,0,0,0.2);
+  border-radius: 8px;
+}
+
+#tinter ::-webkit-scrollbar-thumb{
+  border-radius: 8px;
+  background: #bbb;
+  box-shadow: inset 0 0 6px rgba(0,0,0,0.25);
+  -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.25);
 }
 
 #tinter #interaction {
@@ -70,6 +88,7 @@
 #tinter #chat {
   flex: 1;
   display: flex;
+  background-color: #F0F0F0;
 }
 #tinter #answer {
   grid-area: c;
