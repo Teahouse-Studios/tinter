@@ -7,6 +7,7 @@
   ],
   "repository": "https://github.com/Teahouse-Studios/tinter",
   "scripts": {
+    "build:server": "yarn workspace @teahouse/tinter-server build",
     "build:web": "yarn workspace @teahouse/tinter-web build",
     "dev:web": "yarn workspace @teahouse/tinter-web dev",
     "watch:server": "yarn workspace @teahouse/tinter-server watch",

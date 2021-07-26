@@ -3,9 +3,10 @@ import {
   Box, Stack, useRadio, useRadioGroup,
 } from '@chakra-ui/react';
 import {
-  Clear, Edit, RemoveCircle, SkipNext,
+  Clear, Edit, SkipNext,
 } from '@material-ui/icons';
 
+// @ts-ignore
 import Eraser from '../assets/eraser.svg?component';
 export interface PBData {
   type: 'clear' | 'edit_mode' | 'eraser_mode' | 'color' | 'skip'
