@@ -4,11 +4,10 @@
   flex-direction: column;
   overflow: hidden;
   position: relative;
-  left: 10%;
+  margin: auto;
   width: 80%;
   top: 0px;
   max-width: 1180px;
-  overflow: hidden;
   -moz-user-select:none; /*火狐*/
   -webkit-user-select:none; /*webkit浏览器*/
   -ms-user-select:none; /*IE10*/
@@ -54,7 +53,7 @@
   max-width: 280px;
   grid-area: a;
   display: flex;
-  overflow: scroll;
+ /* overflow: scroll;*/
 }
 #tinter #canvas {
   position: relative;

@@ -133,9 +133,16 @@ export default class Game {
           return conn.close();
         }
 
-        if (this.playerMap[data.data.email]) {
+        const oldPlayer = this.playerMap[data.data.email];
+        if (oldPlayer) {
           logger.info('restored user score, user: %o', p);
-          p.score = this.playerMap[data.data.email].score;
+          p.score = oldPlayer.score;
+          // remove old player
+          this.players = this.players.filter((v) => v.id !== oldPlayer.id);
+          logger.info('close old connection, id: %s', oldPlayer.id);
+          this.connections[oldPlayer.id]?.close('4000', 'repeated player');
+          delete this.connections[oldPlayer.id];
+          this.playerMap[data.data.email] = p;
         } else {
           this.playerMap[data.data.email] = p;
         }

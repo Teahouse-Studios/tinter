@@ -5,7 +5,7 @@ import SockJS from 'sockjs-client';
 import { useHistory } from 'react-router-dom';
 
 import {
-  Avatar, Button, Grid, GridItem, Progress, Text, useToast,
+  Avatar, Box, Button,  Divider, Flex, Icon, Progress, Text, useToast,
 } from '@chakra-ui/react';
 import type { ServerWsData, GAME_STATE } from '../../../server/src/types';
 import { IPlayer } from '../types';
@@ -74,11 +74,20 @@ const RoomPage = () => {
     };
     current.onclose = (msg) => {
       console.log(msg);
-      toast({
-        status: 'error',
-        title: '连接中断, 5秒后重试',
-      });
-      setTimeout(createConnection, 5000);
+      if (Number(msg.code) === 4000) {
+        toast({
+          status: 'warning',
+          title: '玩家重复, 您已断开连接',
+        });
+      }
+      // @ts-ignore
+      if (msg.code !== '4000' && msg.code !== '1000') {
+        toast({
+          status: 'error',
+          title: '连接中断, 5秒后重试',
+        });
+        setTimeout(createConnection, 5000);
+      }
     };
     current.onmessage = (msg) => {
       const data = JSON.parse(msg.data) as ServerWsData;
@@ -204,7 +213,6 @@ const RoomPage = () => {
     };
   };
   useEffect(() => {
-    console.log('createS');
     sock.current?.close();
     createConnection();
     return () => sock.current?.close();
@@ -240,24 +248,39 @@ const RoomPage = () => {
   return <div id="container">
     <div id="content">
       <div id="users" style={{ maxHeight: document.body.clientHeight }}>
-        <div>
+        <div style={{ width: '100%' }}>
           {drawing && <PaintboardControl drawing={drawing} callback={controlCallback} />}
           {/* <button onClick={() => { document.body.requestFullscreen(); }}>EnterFullScreen</button> */}
-          <div>
-            {sortedPlayers.map((v) => (
-              <Grid templateRows={'repeat(2, 1fr)'} templateColumns={'repeat(2, 1fr)'}>
-                <GridItem rowSpan={2} colSpan={1}>
-                  <Avatar src={v.avatarUrl} />
-                </GridItem>
-                <GridItem>
-                  <Text>
-                    {v.username}
-                  </Text>
-                </GridItem>
-                <GridItem>
-                  <Text>{v.score}</Text>
-                </GridItem>
-              </Grid>
+          <div style={{ width: '100%' }}>
+            {sortedPlayers.map((v, i) => (
+              <React.Fragment key={v.id}>
+                <Box m={2} style={{ width: '100%' }}>
+                  <Flex align="center" style={{ width: '100%' }}>
+                    <Box mr={4} style={{ visibility: 'hidden' }}>
+                      <Icon>
+
+                      </Icon>
+                    </Box>
+                    <Box>
+                      <Avatar src={v.avatarUrl} />
+                    </Box>
+                    <Box ml={4}>
+                      <Flex direction="column">
+                        <Box>
+                          <Text fontSize="xl">
+                            {v.username}
+                          </Text>
+                        </Box>
+                        <Box>
+                          <Text>{v.score}分</Text>
+                        </Box>
+                      </Flex>
+                    </Box>
+
+                  </Flex>
+                </Box>
+                {(i !== sortedPlayers.length - 1) && <Divider />}
+              </React.Fragment>
             ))}
           </div>
         </div>

@@ -29,7 +29,7 @@ const GameChat: React.FunctionComponent<IProps> = ({
   }}>
     <div style={{ alignItems: 'flex-start', flexGrow: 1 }}>
       <h2>{type === 'answer' ? '猜' : '聊天'}</h2>
-      <div style={{ overflowY: 'scroll', height: '100px' }} ref={listDom}>
+      <div style={{ overflowY: 'auto', height: '100px' }} ref={listDom}>
         {chat.map((v, i) => (
           <div key={i} style={{ lineBreak: 'anywhere' }}><b>{v.sender}</b> {v.data}</div>
         ))}
