@@ -7,6 +7,7 @@ interface IProps {
   type: 'answer' | 'chat'
   onSubmit: (type: 'answer' | 'chat', message: string) => any
   chat: ILocalMessage[]
+  disabled?: boolean
 }
 
 export interface ILocalMessage {
@@ -16,7 +17,7 @@ export interface ILocalMessage {
 }
 
 const GameChat: React.FunctionComponent<IProps> = ({
-  type, onSubmit, chat,
+  type, onSubmit, chat, disabled
 }) => {
   const [input, setInput] = useState('');
   const [focus, setFocus] = useState(false);
@@ -42,6 +43,7 @@ const GameChat: React.FunctionComponent<IProps> = ({
       setInput('');
     }} style={{ alignItems: 'stretch' }}>
       <Input
+        disabled={disabled || false}
         tabIndex={focus ? 1 : type === 'answer' ? 2 : 3}
         onFocus={() => setFocus(true)}
         onBlur={() => setFocus(false)}

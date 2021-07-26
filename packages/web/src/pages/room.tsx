@@ -317,7 +317,7 @@ const RoomPage = () => {
         </div>
       </div>
       <div id="answer">
-        <GameChat type={'answer'} onSubmit={submitContent} chat={answerChat} />
+        <GameChat type={'answer'} onSubmit={submitContent} chat={answerChat} disabled={success[selfId] || stateRef.current === selfId}/>
       </div>
       <div id="chat">
         <GameChat type={'chat'} onSubmit={submitContent} chat={chat} />
