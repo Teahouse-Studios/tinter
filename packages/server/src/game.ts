@@ -171,7 +171,7 @@ export default class Game {
         });
       }
 
-      if (data.type === 'draw') return this.boardcast(data);
+      if (data.type === 'draw' && conn.id === this.state) return this.boardcast(data);
 
       if (data.type === 'message') {
         if (data.subtype === 'chat') {
