@@ -74,7 +74,7 @@ const PaintboardControl: React.FunctionComponent<IProps> = ({ drawing, callback 
   return <Box p={2}>
     {drawing}
     <br />
-    <Stack {...group} spacing={2} direction={'row'} align={'center'}>
+    <Stack wrap="wrap" {...group} spacing={2} direction={'row'} align={'center'}>
       {options.map(([value, icon]) => {
         const radio = getRadioProps({ value });
         return <RadioCard key={value} {...radio}>{icon}</RadioCard>;

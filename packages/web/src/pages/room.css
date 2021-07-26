@@ -98,6 +98,9 @@
 }
 
 @media (max-width: 1000px) {
+  #tinter {
+    width: 100%;
+  }
   #tinter #root {
     left: 0px;
     width: 100%;

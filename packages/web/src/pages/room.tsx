@@ -5,7 +5,7 @@ import SockJS from 'sockjs-client';
 import { useHistory } from 'react-router-dom';
 
 import {
-  Avatar, Box, Button, Divider, Flex, Icon, Progress, Text, useToast,
+  Avatar, Box, Button, Divider, Flex, Icon, Progress, Text, useMediaQuery, useToast,
 } from '@chakra-ui/react';
 import { Done, Edit } from '@material-ui/icons';
 import type { ServerWsData, GAME_STATE } from '../../../server/src/types';
@@ -248,6 +248,7 @@ const RoomPage = () => {
       setProgressType('indeterminate');
     }
   }, [players]);
+  const [isMobile] = useMediaQuery('(max-width: 600px)');
   useInterval(() => setTime(time - 0.05), 50);
   // eslint-disable-next-line no-mixed-operators
   const progress = useMemo(() => time * 100 / timeMax, [time, timeMax]);
@@ -259,25 +260,25 @@ const RoomPage = () => {
           {drawing && <PaintboardControl drawing={drawing} callback={controlCallback} />}
           {/* <button onClick={() => { document.body.requestFullscreen(); }}>EnterFullScreen</button> */}
           <div style={{ width: '100%' }}>
-            {sortedPlayers.map((v, i) => {
+            {stateRef.current !== selfId && sortedPlayers.map((v, i) => {
               const showIcon = success[v.id] || stateRef.current === v.id || false;
               return (
                 <React.Fragment key={v.id}>
-                  <Box m={2} style={{ width: '100%' }}>
+                  <Box p={2} style={{ width: '100%' }}>
                     <Flex align="center" style={{ width: '100%' }}>
-                      <Box mr={4} style={{ visibility: showIcon ? 'unset' : 'hidden' }}>
+                      {!isMobile && <Box mr={4} style={{ visibility: showIcon ? 'unset' : 'hidden' }}>
                         <Icon>
                           {success[v.id] && (<Done />)}
                           {stateRef.current === v.id && (<Edit />)}
                         </Icon>
-                      </Box>
+                      </Box>}
                       <Box>
                         <Avatar src={v.avatarUrl} />
                       </Box>
-                      <Box ml={4}>
+                      <Box pl={4}>
                         <Flex direction="column">
                           <Box>
-                            <Text fontSize="xl">
+                            <Text fontSize={isMobile ? 'lg' : 'xl'} style={{ lineBreak: 'anywhere' }}>
                               {v.username}
                             </Text>
                           </Box>
