@@ -26,6 +26,9 @@ export type ClientWsData =
   } | {
     type: 'start';
   } | {
+    type: 'select'
+    data: string
+  } | {
     type: 'hello';
     data: {
       username: string;

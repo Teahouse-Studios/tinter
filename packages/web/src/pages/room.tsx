@@ -35,6 +35,8 @@ const RoomPage = () => {
   const selfIdRef = useRef('');
   const ownerId = useMemo(() => players.find((v) => v.owner)?.id, [players]);
   const stateRef = useRef<GAME_STATE>(0);
+  const [alternatives, setAlternatives] = useState<[string, string]>(['', '']);
+  const alternativesRef = useRef<[string, string]>(['', '']);
   const [drawing, setDrawing] = useState('');
   const drawingRef = useRef('');
   const [timeMax, setTimeMax] = useState(0);
@@ -121,12 +123,13 @@ const RoomPage = () => {
         } else if (data.subtype === 'currentAnswer') {
           setTime(10);
           setTimeMax(10);
-          setDrawing('');
           answerChatRef.current = [...answerChatRef.current, {
             sender: '正确答案',
             data: data.data,
           }];
           setAnswerChat(answerChatRef.current);
+          setDrawing('');
+          drawingRef.current = '';
         } else if (data.subtype === 'info') {
           const gameInfoMap = {
             E_NOT_START: '游戏未开始',
@@ -197,8 +200,8 @@ const RoomPage = () => {
         } else if (data.subtype === 'draw') {
           DrawSound.play();
           stateRef.current = selfIdRef.current;
-          setDrawing(data.data);
-          drawingRef.current = data.data;
+          setAlternatives(JSON.parse(data.data));
+          alternativesRef.current = JSON.parse(data.data);
         }
       } else if (data.type === 'draw') {
         if (!drawingRef.current) {
@@ -248,6 +251,15 @@ const RoomPage = () => {
       setProgressType('indeterminate');
     }
   }, [players]);
+  const selectDrawing = (v: string) => {
+    setDrawing(v);
+    sock.current?.send(JSON.stringify({
+      type: 'select',
+      data: v,
+    }));
+    setAlternatives([]);
+  };
+
   const [isMobile] = useMediaQuery('(max-width: 600px)');
   useInterval(() => setTime(time - 0.05), 50);
   // eslint-disable-next-line no-mixed-operators
@@ -260,7 +272,7 @@ const RoomPage = () => {
           {drawing && <PaintboardControl drawing={drawing} callback={controlCallback} />}
           {/* <button onClick={() => { document.body.requestFullscreen(); }}>EnterFullScreen</button> */}
           <div style={{ width: '100%' }}>
-            {stateRef.current !== selfId && sortedPlayers.map((v, i) => {
+            {(isMobile ? (stateRef.current !== selfId) : true) && sortedPlayers.map((v, i) => {
               const showIcon = success[v.id] || stateRef.current === v.id || false;
               return (
                 <React.Fragment key={v.id}>
@@ -314,6 +326,20 @@ const RoomPage = () => {
             }}>
               <Button colorScheme="blue" size={'lg'} onClick={startGame}>开始</Button>
             </div>
+          )}
+          {stateRef.current !== 0 && stateRef.current === selfId && !drawing && alternatives.length >= 1 && (
+            <Flex style={{
+              position: 'absolute',
+              width: '100%',
+              height: '100%',
+              top: 0,
+              left: 0,
+            }} justify="center" align="center" direction="column">
+              <Text fontSize="3xl">有~什~么~呢~</Text><br />
+              <Box mt={2}>
+                <Button onClick={() => selectDrawing(alternatives[0])}>{alternatives[0]}</Button> 或 <Button onClick={() => selectDrawing(alternatives[1])}>{alternatives[1]}</Button>
+              </Box>
+            </Flex>
           )}
         </div>
       </div>

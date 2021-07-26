@@ -21,7 +21,8 @@ export default class Game {
   connections: Record<string, sockjs.Connection> = {};
   state: GAME_STATE = STATE_WAITING;
   sockjs = sockjs.createServer({ prefix: '/room', log: sockLog });
-  currentAnswer: [string, string] = ['', ''];
+  alternativeAnswers: [string, string] = ['', ''];
+  answer: string;
   success: Record<string, boolean> = {};
   startGameInterval: any;
   finishRoundInterval: any;
@@ -58,22 +59,22 @@ export default class Game {
   public startGame() {
     if (this.players.length < 2) return false;
     this.startTime = new Date().valueOf();
-    this.currentAnswer = [Words[Math.floor(Math.random() * Words.length)], Words[Math.floor(Math.random() * Words.length)]];
+    this.alternativeAnswers = [Words[Math.floor(Math.random() * Words.length)], Words[Math.floor(Math.random() * Words.length)]];
     this.state = this.players[0].id;
     this.players.push(this.players.shift());
     this.boardcast({ type: 'start', subtype: 'guess', data: this.state });
-    this.connections[this.state].send({ type: 'start', subtype: 'draw', data: this.currentAnswer.join(' 或 ') });
+    this.connections[this.state].send({ type: 'start', subtype: 'draw', data: JSON.stringify(this.alternativeAnswers) });
     this.success = {};
     this.finishRoundInterval = setTimeout(this.finishRound, 60000);
 
-    logger.info('start game, answer: %o, draw: %s', this.currentAnswer, this.getPlayer(this.state).username);
+    logger.info('start game, answers: %o, draw: %s', this.alternativeAnswers, this.getPlayer(this.state).username);
     this.boardcastSuccess();
     return true;
   }
 
   public finishRound() {
     logger.info('finish round');
-    this.boardcast({ type: 'message', subtype: 'currentAnswer', data: this.currentAnswer.join(' 或 ') });
+    this.boardcast({ type: 'message', subtype: 'currentAnswer', data: this.answer });
     this.startGameInterval = setTimeout(this.startGame, 10000);
     this.checkWinned();
   }
@@ -175,7 +176,7 @@ export default class Game {
 
       if (data.type === 'message') {
         if (data.subtype === 'chat') {
-          if (this.currentAnswer.includes(data.data)) return conn.info('E_SEND_ANSWER');
+          if (this.alternativeAnswers.includes(data.data)) return conn.info('E_SEND_ANSWER');
           chatLogger.info('[chat] %s: %s', p.username, data.data);
           return this.boardcast({ ...data, sender: conn.id });
         }
@@ -184,9 +185,10 @@ export default class Game {
           if (!this.state) return conn.info('E_NOT_START');
           if (this.success[conn.id]) return conn.info('E_SUCCESS');
           if (this.state === conn.id) return conn.info('E_DRAW');
+          if (!this.answer) return conn.info('E_NOT_START');
           if ((new Date().valueOf() - this.startTime!) > 60 * 10000) return conn.info('E_FINISHED');
           chatLogger.info('[answer] %s: %s', p.username, data.data);
-          if (this.currentAnswer.includes(data.data)) {
+          if (data.data === this.answer) {
             this.score(conn.id, Math.max(10 - Object.keys(this.success).length, 3));
             this.score(this.state, 3);
             this.success[conn.id] = true;
@@ -224,6 +226,15 @@ export default class Game {
         clearTimeout(this.finishRoundInterval);
         this.finishRound();
       }
+
+      if (data.type === 'select') {
+        if (!this.alternativeAnswers.includes(data.data)) {
+          return null;
+        }
+        logger.info('selected answer: %s', data.data);
+        this.answer = data.data;
+      }
+
       return null;
     });
 
