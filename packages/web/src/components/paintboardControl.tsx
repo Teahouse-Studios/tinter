@@ -68,7 +68,7 @@ const PaintboardControl: React.FunctionComponent<IProps> = ({ drawing, callback 
     onChange: (s) => callback({ type: s as any }),
   });
   const group = getRootProps();
-  return <div>
+  return <Box p={2}>
     {drawing}
     <br />
     <Stack {...group} spacing={2} direction={'row'} align={'center'}>
@@ -79,8 +79,8 @@ const PaintboardControl: React.FunctionComponent<IProps> = ({ drawing, callback 
     </Stack>
     <br />
     <input type={'color'} className="colorSelect" onChange={(e) => setColor(e.target.value)} value={color} />
-    {colors.map((v) => <div style={{ backgroundColor: v }} className="colorButton" onClick={() => setColor(v)} />)}
-  </div>;
+    {colors.map((v) => <div key={v} style={{ backgroundColor: v }} className="colorButton" onClick={() => setColor(v)} />)}
+  </Box>;
 };
 
 export default PaintboardControl;

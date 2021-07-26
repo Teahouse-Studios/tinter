@@ -67,7 +67,7 @@ export default class Game {
     this.finishRoundInterval = setTimeout(this.finishRound, 60000);
 
     logger.info('start game, answer: %o, draw: %s', this.currentAnswer, this.getPlayer(this.state).username);
-
+    this.boardcastSuccess();
     return true;
   }
 
@@ -90,6 +90,13 @@ export default class Game {
     this.boardcast({
       type: 'players',
       data: this.players,
+    });
+  }
+
+  public boardcastSuccess() {
+    this.boardcast({
+      type: 'success',
+      data: this.success,
     });
   }
 
@@ -188,6 +195,7 @@ export default class Game {
               this.finishRound();
             }
 
+            this.boardcastSuccess();
             return this.boardcast({
               type: 'message',
               subtype: 'info',

@@ -37,7 +37,7 @@ export type ClientWsData =
 
 export type ServerMessageEvent = {
   type: 'message';
-  subtype: 'chat' | 'answer' | 'info' | 'currentAnswer';
+  subtype: 'chat' | 'answer' | 'info' | 'currentAnswer' | 'success';
   data: string;
   sender?: string;
 };
@@ -54,6 +54,9 @@ export type ServerWsData =
     type: 'start';
     subtype: 'draw' | 'guess';
     data: string;
+  } | {
+    type: 'success';
+    data: Record<string, boolean>
   } | {
     type: 'score';
     sender: string;

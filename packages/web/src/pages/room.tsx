@@ -5,8 +5,9 @@ import SockJS from 'sockjs-client';
 import { useHistory } from 'react-router-dom';
 
 import {
-  Avatar, Box, Button,  Divider, Flex, Icon, Progress, Text, useToast,
+  Avatar, Box, Button, Divider, Flex, Icon, Progress, Text, useToast,
 } from '@chakra-ui/react';
+import { Done, Edit } from '@material-ui/icons';
 import type { ServerWsData, GAME_STATE } from '../../../server/src/types';
 import { IPlayer } from '../types';
 import Paintboard from '../components/paintboard';
@@ -31,6 +32,7 @@ const RoomPage = () => {
   const [players, setPlayers] = useState<IPlayer[]>([]);
   const playersRef = useRef<IPlayer[]>([]);
   const [selfId, setSelfId] = useState('');
+  const selfIdRef = useRef('');
   const ownerId = useMemo(() => players.find((v) => v.owner)?.id, [players]);
   const stateRef = useRef<GAME_STATE>(0);
   const [drawing, setDrawing] = useState('');
@@ -43,6 +45,8 @@ const RoomPage = () => {
   const answerChatRef = useRef<ILocalMessage[]>([]);
   const [chat, setChat] = useState<ILocalMessage[]>([]);
   const chatRef = useRef<ILocalMessage[]>([]);
+
+  const [success, setSuccess] = useState<Record<string, boolean>>({});
 
   const createConnection = () => {
     // @ts-ignore
@@ -105,6 +109,7 @@ const RoomPage = () => {
         }
       } else if (data.type === 'selfId') {
         setSelfId(data.data);
+        selfIdRef.current = data.data;
       } else if (data.type === 'message') {
         const player = playersRef.current.find((v) => v.id === data.sender);
         if (data.subtype === 'chat') {
@@ -177,7 +182,7 @@ const RoomPage = () => {
         if (data.subtype === 'guess') {
           NextSound.play();
           stateRef.current = data.data;
-          if (data.data !== selfId) {
+          if (data.data !== selfIdRef.current) {
             setDrawing('');
             drawingRef.current = '';
           }
@@ -191,7 +196,7 @@ const RoomPage = () => {
           }
         } else if (data.subtype === 'draw') {
           DrawSound.play();
-          stateRef.current = selfId;
+          stateRef.current = selfIdRef.current;
           setDrawing(data.data);
           drawingRef.current = data.data;
         }
@@ -209,6 +214,8 @@ const RoomPage = () => {
           return v;
         });
         setPlayers(playersRef.current);
+      } else if (data.type === 'success') {
+        setSuccess(data.data);
       }
     };
   };
@@ -252,36 +259,40 @@ const RoomPage = () => {
           {drawing && <PaintboardControl drawing={drawing} callback={controlCallback} />}
           {/* <button onClick={() => { document.body.requestFullscreen(); }}>EnterFullScreen</button> */}
           <div style={{ width: '100%' }}>
-            {sortedPlayers.map((v, i) => (
-              <React.Fragment key={v.id}>
-                <Box m={2} style={{ width: '100%' }}>
-                  <Flex align="center" style={{ width: '100%' }}>
-                    <Box mr={4} style={{ visibility: 'hidden' }}>
-                      <Icon>
+            {sortedPlayers.map((v, i) => {
+              const showIcon = success[v.id] || stateRef.current === v.id || false;
+              return (
+                <React.Fragment key={v.id}>
+                  <Box m={2} style={{ width: '100%' }}>
+                    <Flex align="center" style={{ width: '100%' }}>
+                      <Box mr={4} style={{ visibility: showIcon ? 'unset' : 'hidden' }}>
+                        <Icon>
+                          {success[v.id] && (<Done />)}
+                          {stateRef.current === v.id && (<Edit />)}
+                        </Icon>
+                      </Box>
+                      <Box>
+                        <Avatar src={v.avatarUrl} />
+                      </Box>
+                      <Box ml={4}>
+                        <Flex direction="column">
+                          <Box>
+                            <Text fontSize="xl">
+                              {v.username}
+                            </Text>
+                          </Box>
+                          <Box>
+                            <Text>{v.score}分</Text>
+                          </Box>
+                        </Flex>
+                      </Box>
 
-                      </Icon>
-                    </Box>
-                    <Box>
-                      <Avatar src={v.avatarUrl} />
-                    </Box>
-                    <Box ml={4}>
-                      <Flex direction="column">
-                        <Box>
-                          <Text fontSize="xl">
-                            {v.username}
-                          </Text>
-                        </Box>
-                        <Box>
-                          <Text>{v.score}分</Text>
-                        </Box>
-                      </Flex>
-                    </Box>
-
-                  </Flex>
-                </Box>
-                {(i !== sortedPlayers.length - 1) && <Divider />}
-              </React.Fragment>
-            ))}
+                    </Flex>
+                  </Box>
+                  {(i !== sortedPlayers.length - 1) && <Divider />}
+                </React.Fragment>
+              );
+            })}
           </div>
         </div>
       </div>
