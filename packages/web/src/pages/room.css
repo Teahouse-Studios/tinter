@@ -83,9 +83,6 @@
     width: 100%;
     top: 0px;
   }
-  #tinter .colorSelect {
-    display: none;
-  }
   #tinter #content {
     grid-template-areas:
       "b b"
