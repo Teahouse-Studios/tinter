@@ -233,6 +233,7 @@ export default class Game {
         }
         logger.info('selected answer: %s', data.data);
         this.answer = data.data;
+        clearTimeout(this.finishRoundTimeout);
         this.finishRoundTimeout = setTimeout(this.finishRound, 60000);
       }
 
