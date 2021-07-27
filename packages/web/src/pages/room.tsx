@@ -127,8 +127,8 @@ const RoomPage = () => {
           setTimeMax(10);
           if (data.data === 'skipped') {
             answerChatRef.current = [...answerChatRef.current, {
-              sender: <span style={{ color: 'yellow' }}>{data.sender}</span>,
-              data: <span style={{ color: 'yellow' }}>错过了他的回合</span>,
+              sender: <span style={{ color: 'yellowgreen' }}>{data.sender}</span>,
+              data: <span style={{ color: 'yellowgreen' }}>错过了他的回合</span>,
             }];
           } else {
             answerChatRef.current = [...answerChatRef.current, {
