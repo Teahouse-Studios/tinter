@@ -125,10 +125,17 @@ const RoomPage = () => {
         } else if (data.subtype === 'currentAnswer') {
           setTime(10);
           setTimeMax(10);
-          answerChatRef.current = [...answerChatRef.current, {
-            sender: <span style={{ color: 'green' }}>正确答案</span>,
-            data: <span style={{ color: 'green' }}>{data.data}</span>,
-          }];
+          if (data.data === 'skipped') {
+            answerChatRef.current = [...answerChatRef.current, {
+              sender: <span style={{ color: 'yellow' }}>{data.sender}</span>,
+              data: <span style={{ color: 'yellow' }}>错过了他的回合</span>,
+            }];
+          } else {
+            answerChatRef.current = [...answerChatRef.current, {
+              sender: <span style={{ color: 'green' }}>正确答案</span>,
+              data: <span style={{ color: 'green' }}>{data.data}</span>,
+            }];
+          }
           setAnswerChat(answerChatRef.current);
           setDrawing('');
           drawingRef.current = '';

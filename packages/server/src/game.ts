@@ -24,8 +24,8 @@ export default class Game {
   alternativeAnswers: [string, string] = ['', ''];
   answer: string;
   success: Record<string, boolean> = {};
-  startGameTimeout: any;
-  finishRoundTimeout: any;
+  startGameTimeout: NodeJS.Timeout;
+  finishRoundTimeout: NodeJS.Timeout;
   startTime: number | null = null;
   playerMap: Record<string, IPlayer> = {}; // email to userid
 
@@ -73,8 +73,12 @@ export default class Game {
   }
 
   public finishRound(skip = false) {
+    clearTimeout(this.startGameTimeout);
+    clearTimeout(this.finishRoundTimeout);
     logger.info('finish round');
-    this.boardcast({ type: 'message', subtype: 'currentAnswer', data: skip ? this.answer : 'skipped' });
+    this.boardcast({
+      type: 'message', subtype: 'currentAnswer', data: skip ? this.answer : 'skipped', sender: this.state.toString(),
+    });
     this.startGameTimeout = setTimeout(this.startGame, 10000);
     this.checkWinned();
   }
@@ -82,8 +86,8 @@ export default class Game {
   public resetRoom() {
     logger.info('reset room');
     this.boardcast({ type: 'start', subtype: 'guess', data: '' });
-    clearInterval(this.startGameTimeout);
-    clearInterval(this.finishRoundTimeout);
+    clearTimeout(this.startGameTimeout);
+    clearTimeout(this.finishRoundTimeout);
     this.state = STATE_WAITING;
     this.players.forEach((v) => {
       v.score = 0;
@@ -104,8 +108,6 @@ export default class Game {
   public checkWinned() {
     const winner = this.players.find((v) => v.score >= WIN_SCORE);
     if (winner) {
-      clearTimeout(this.startGameTimeout);
-      clearTimeout(this.finishRoundTimeout);
       this.resetRoom();
       this.startGameTimeout = setTimeout(this.startGame, 10000);
     }
@@ -193,7 +195,6 @@ export default class Game {
             this.score(this.state, 3);
             this.success[conn.id] = true;
             if (Object.keys(this.success).length === this.players.length - 1) {
-              clearTimeout(this.finishRoundTimeout);
               this.finishRound();
             }
 
@@ -223,7 +224,6 @@ export default class Game {
       if (data.type === 'skip') {
         if (!this.state) return conn.info('E_NOT_STARTED');
         if (conn.id !== this.state) return conn.info('E_NOT_CURRENT');
-        clearTimeout(this.finishRoundTimeout);
         this.finishRound(true);
       }
 
@@ -233,7 +233,6 @@ export default class Game {
         }
         logger.info('selected answer: %s', data.data);
         this.answer = data.data;
-        clearTimeout(this.finishRoundTimeout);
         this.finishRoundTimeout = setTimeout(this.finishRound, 60000);
       }
 
