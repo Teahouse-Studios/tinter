@@ -127,13 +127,13 @@ const RoomPage = () => {
           setTimeMax(10);
           if (data.data === 'skipped') {
             answerChatRef.current = [...answerChatRef.current, {
-              sender: <span style={{ color: 'yellowgreen' }}>{data.sender}</span>,
-              data: <span style={{ color: 'yellowgreen' }}>错过了他的回合</span>,
+              sender: <span style={{ color: '#ff9900' }}>{data.sender}</span>,
+              data: <span style={{ color: '#ff9900' }}>错过了他的回合</span>,
             }];
           } else {
             answerChatRef.current = [...answerChatRef.current, {
-              sender: <span style={{ color: 'green' }}>正确答案</span>,
-              data: <span style={{ color: 'green' }}>{data.data}</span>,
+              sender: <span style={{ color: '#207f4c' }}>正确答案</span>,
+              data: <span style={{ color: '#207f4c' }}>{data.data}</span>,
             }];
           }
           setAnswerChat(answerChatRef.current);
@@ -153,7 +153,7 @@ const RoomPage = () => {
           type chatKey = keyof typeof gameChatMap;
           if (Object.keys(gameInfoMap).includes(data.data)) {
             answerChatRef.current = [...answerChatRef.current, {
-              data: <span style={{ color: 'blue' }}>{gameInfoMap[data.data as infoKey]}</span>,
+              data: <span style={{ color: '#2376b7' }}>{gameInfoMap[data.data as infoKey]}</span>,
             }];
             setAnswerChat(answerChatRef.current);
           } else if (Object.keys(gameChatMap).includes(data.data)) {
@@ -169,8 +169,8 @@ const RoomPage = () => {
             SuccessSound.play();
             if (data.data) {
               answerChatRef.current = [...answerChatRef.current, {
-                sender: <span style={{ color: 'green' }}>{player?.username}</span>,
-                data: <span style={{ color: 'green' }}>猜对了</span>,
+                sender: <span style={{ color: '#207f4c' }}>{player?.username}</span>,
+                data: <span style={{ color: '#207f4c' }}>猜对了</span>,
               }];
               setAnswerChat(answerChatRef.current);
             }
