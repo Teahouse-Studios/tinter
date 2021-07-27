@@ -24,8 +24,8 @@ export default class Game {
   alternativeAnswers: [string, string] = ['', ''];
   answer: string;
   success: Record<string, boolean> = {};
-  startGameInterval: any;
-  finishRoundInterval: any;
+  startGameTimeout: any;
+  finishRoundTimeout: any;
   startTime: number | null = null;
   playerMap: Record<string, IPlayer> = {}; // email to userid
 
@@ -65,25 +65,25 @@ export default class Game {
     this.boardcast({ type: 'start', subtype: 'guess', data: this.state });
     this.connections[this.state].send({ type: 'start', subtype: 'draw', data: JSON.stringify(this.alternativeAnswers) });
     this.success = {};
-    this.finishRoundInterval = setTimeout(this.finishRound, 60000);
-
+    this.answer = '';
+    this.finishRoundTimeout = setTimeout(() => this.finishRound(true), 10000);
     logger.info('start game, answers: %o, draw: %s', this.alternativeAnswers, this.getPlayer(this.state).username);
     this.boardcastSuccess();
     return true;
   }
 
-  public finishRound() {
+  public finishRound(skip = false) {
     logger.info('finish round');
-    this.boardcast({ type: 'message', subtype: 'currentAnswer', data: this.answer });
-    this.startGameInterval = setTimeout(this.startGame, 10000);
+    this.boardcast({ type: 'message', subtype: 'currentAnswer', data: skip ? this.answer : 'skipped' });
+    this.startGameTimeout = setTimeout(this.startGame, 10000);
     this.checkWinned();
   }
 
   public resetRoom() {
     logger.info('reset room');
     this.boardcast({ type: 'start', subtype: 'guess', data: '' });
-    clearInterval(this.startGameInterval);
-    clearInterval(this.finishRoundInterval);
+    clearInterval(this.startGameTimeout);
+    clearInterval(this.finishRoundTimeout);
     this.state = STATE_WAITING;
     this.players.forEach((v) => {
       v.score = 0;
@@ -104,10 +104,10 @@ export default class Game {
   public checkWinned() {
     const winner = this.players.find((v) => v.score >= WIN_SCORE);
     if (winner) {
-      clearTimeout(this.startGameInterval);
-      clearTimeout(this.finishRoundInterval);
+      clearTimeout(this.startGameTimeout);
+      clearTimeout(this.finishRoundTimeout);
       this.resetRoom();
-      this.startGameInterval = setTimeout(this.startGame, 10000);
+      this.startGameTimeout = setTimeout(this.startGame, 10000);
     }
   }
 
@@ -193,7 +193,7 @@ export default class Game {
             this.score(this.state, 3);
             this.success[conn.id] = true;
             if (Object.keys(this.success).length === this.players.length - 1) {
-              clearTimeout(this.finishRoundInterval);
+              clearTimeout(this.finishRoundTimeout);
               this.finishRound();
             }
 
@@ -223,16 +223,18 @@ export default class Game {
       if (data.type === 'skip') {
         if (!this.state) return conn.info('E_NOT_STARTED');
         if (conn.id !== this.state) return conn.info('E_NOT_CURRENT');
-        clearTimeout(this.finishRoundInterval);
-        this.finishRound();
+        clearTimeout(this.finishRoundTimeout);
+        this.finishRound(true);
       }
 
       if (data.type === 'select') {
-        if (!this.alternativeAnswers.includes(data.data)) {
+        if (this.answer || !this.alternativeAnswers.includes(data.data)) {
           return null;
         }
         logger.info('selected answer: %s', data.data);
         this.answer = data.data;
+        clearTimeout(this.finishRoundTimeout);
+        this.finishRoundTimeout = setTimeout(this.finishRound, 60000);
       }
 
       return null;

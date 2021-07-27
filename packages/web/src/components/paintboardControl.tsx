@@ -82,7 +82,13 @@ const PaintboardControl: React.FunctionComponent<IProps> = ({ drawing, callback 
       <input type={'color'} className="colorSelect" onChange={(e) => setColor(e.target.value)} value={color} />
     </Stack>
     <br />
-    {colors.map((v) => <div key={v} style={{ backgroundColor: v }} className="colorButton" onClick={() => setColor(v)} />)}
+    {colors.map((v) => (
+      <div
+        key={v} style={{ backgroundColor: v }} className="colorButton"
+        onClick={() => setColor(v)}
+        onPointerDown={() => setColor(v)}
+      />
+    ))}
   </Box>;
 };
 

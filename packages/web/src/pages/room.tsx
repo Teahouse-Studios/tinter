@@ -28,6 +28,8 @@ const RoomPage = () => {
   const toast = useToast();
   const history = useHistory();
   const sock = useRef<WebSocket | null>(null);
+  // @ts-ignore
+  window.sock = sock;
   const paintboardRef = useRef<HTMLInputElement | null>(null);
   const [players, setPlayers] = useState<IPlayer[]>([]);
   const playersRef = useRef<IPlayer[]>([]);
@@ -124,8 +126,8 @@ const RoomPage = () => {
           setTime(10);
           setTimeMax(10);
           answerChatRef.current = [...answerChatRef.current, {
-            sender: '正确答案',
-            data: data.data,
+            sender: <span style={{ color: 'green' }}>正确答案</span>,
+            data: <span style={{ color: 'green' }}>{data.data}</span>,
           }];
           setAnswerChat(answerChatRef.current);
           setDrawing('');
@@ -180,8 +182,8 @@ const RoomPage = () => {
         setProgressType('determinate');
         // @ts-ignore
         paintboardRef.current?.update({ type: 'clear' });
-        setTime(60);
-        setTimeMax(60);
+        setTime(70);
+        setTimeMax(70);
         if (data.subtype === 'guess') {
           NextSound.play();
           stateRef.current = data.data;
@@ -253,12 +255,12 @@ const RoomPage = () => {
   }, [players]);
   const selectDrawing = (v: string) => {
     setDrawing(v);
-    drawingRef.current = v
+    drawingRef.current = v;
     sock.current?.send(JSON.stringify({
       type: 'select',
       data: v,
     }));
-    setAlternatives(['','']);
+    setAlternatives(['', '']);
   };
 
   const [isMobile] = useMediaQuery('(max-width: 600px)');
@@ -300,7 +302,6 @@ const RoomPage = () => {
                           </Box>
                         </Flex>
                       </Box>
-
                     </Flex>
                   </Box>
                   {(i !== sortedPlayers.length - 1) && <Divider />}
@@ -328,7 +329,7 @@ const RoomPage = () => {
               <Button colorScheme="blue" size={'lg'} onClick={startGame}>开始</Button>
             </div>
           )}
-          {stateRef.current !== 0 && stateRef.current === selfId && !drawing && alternatives.filter(v => v).length >= 1 && (
+          {stateRef.current !== 0 && stateRef.current === selfId && !drawing && alternatives.filter((v) => v).length >= 1 && (
             <Flex style={{
               position: 'absolute',
               width: '100%',
@@ -338,7 +339,9 @@ const RoomPage = () => {
             }} justify="center" align="center" direction="column">
               <Text fontSize="3xl">有~什~么~呢~</Text><br />
               <Box mt={2}>
-                <Button onClick={() => selectDrawing(alternatives[0])}>{alternatives[0]}</Button> 或 <Button onClick={() => selectDrawing(alternatives[1])}>{alternatives[1]}</Button>
+                <Button onClick={() => selectDrawing(alternatives[0])}>{alternatives[0]}</Button>
+                或
+                <Button onClick={() => selectDrawing(alternatives[1])}>{alternatives[1]}</Button>
               </Box>
             </Flex>
           )}
