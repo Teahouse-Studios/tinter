@@ -77,7 +77,7 @@ export default class Game {
     clearTimeout(this.finishRoundTimeout);
     logger.info('finish round');
     this.boardcast({
-      type: 'message', subtype: 'currentAnswer', data: skip ? this.answer : 'skipped', sender: this.state.toString(),
+      type: 'message', subtype: 'currentAnswer', data: skip ? 'skipped' : this.answer, sender: this.state.toString(),
     });
     this.startGameTimeout = setTimeout(this.startGame, 10000);
     this.checkWinned();
