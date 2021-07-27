@@ -257,7 +257,7 @@ const RoomPage = () => {
       type: 'select',
       data: v,
     }));
-    setAlternatives([]);
+    setAlternatives(['','']);
   };
 
   const [isMobile] = useMediaQuery('(max-width: 600px)');
@@ -327,7 +327,7 @@ const RoomPage = () => {
               <Button colorScheme="blue" size={'lg'} onClick={startGame}>开始</Button>
             </div>
           )}
-          {stateRef.current !== 0 && stateRef.current === selfId && !drawing && alternatives.length >= 1 && (
+          {stateRef.current !== 0 && stateRef.current === selfId && !drawing && alternatives.filter(v => v).length >= 1 && (
             <Flex style={{
               position: 'absolute',
               width: '100%',
