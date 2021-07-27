@@ -253,6 +253,7 @@ const RoomPage = () => {
   }, [players]);
   const selectDrawing = (v: string) => {
     setDrawing(v);
+    drawingRef.current = v
     sock.current?.send(JSON.stringify({
       type: 'select',
       data: v,
