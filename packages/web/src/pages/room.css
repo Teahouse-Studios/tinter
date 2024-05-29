@@ -119,3 +119,86 @@
     display: none;
   }
 }
+
+@media screen and (min-height: 800px)
+{
+  #tinter
+  {
+     height: 100vh;
+  }
+}
+
+.colorSelect input
+{
+  margin-top:10px;
+  border-radius:10px;
+  margin:10px;
+}
+
+#tinter #container{
+
+  border-radius:10px;
+  background:#87B0A9;
+  padding:5px;
+  max-height:1000px;
+
+}
+
+#tinter .colorButton
+{
+  margin:3px;
+  border-radius:3px;
+}
+
+.main-container
+{
+  border-radius:10px;
+  background:#87B0A9;
+  padding:20px;
+}
+
+.MuiButton-root{
+    border-color: #4D736E
+}
+
+.MuiButton-label
+{
+  color:#4D736E
+}
+
+#tinter #answer,
+#tinter #chat,
+#tinter #canvas,
+#tinter #users
+{
+  background:#FFFFFF;
+  margin:10px;
+  border-radius:10px;
+  padding:10px;
+}
+
+
+.MuiLinearProgress-bar
+{
+  background:#E4EDED
+}
+
+.MuiPaper-outlined{
+  border:0
+}
+
+.MuiLinearProgress-colorPrimary
+{
+  background:#4D736E;
+}
+
+h2{
+  font-size:20px;
+  color:#4D736E;
+  border-bottom:1.5px solid #4D736E;
+}
+
+#root,
+html body{
+  background-color:#4D736E; 
+}
